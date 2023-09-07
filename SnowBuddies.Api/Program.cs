@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SnowBuddies.Infrastructure.Repositories
 using Npgsql;
 using SnowBuddies.Infrastructure.Data;
 
