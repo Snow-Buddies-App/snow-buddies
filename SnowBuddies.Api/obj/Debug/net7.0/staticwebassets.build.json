@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "6YuMwBzRXai1tMWMpDoEFNus0tR7Ipy6RKT43fhHinY=",
+  "Source": "SnowBuddies.Api",
+  "BasePath": "_content/SnowBuddies.Api",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

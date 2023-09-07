@@ -1,0 +1,3 @@
+﻿<Project>
+  <Import Project="..\build\SnowBuddies.Api.props" />
+</Project>

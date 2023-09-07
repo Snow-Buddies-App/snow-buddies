@@ -1,0 +1,11 @@
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\bin\Debug\net7.0\SnowBuddies.Domain.deps.json
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\bin\Debug\net7.0\SnowBuddies.Domain.dll
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\bin\Debug\net7.0\SnowBuddies.Domain.pdb
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\SnowBuddies.Domain.GeneratedMSBuildEditorConfig.editorconfig
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\SnowBuddies.Domain.AssemblyInfoInputs.cache
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\SnowBuddies.Domain.AssemblyInfo.cs
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\SnowBuddies.Domain.csproj.CoreCompileInputs.cache
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\SnowBuddies.Domain.dll
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\refint\SnowBuddies.Domain.dll
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\SnowBuddies.Domain.pdb
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Domain\obj\Debug\net7.0\ref\SnowBuddies.Domain.dll
