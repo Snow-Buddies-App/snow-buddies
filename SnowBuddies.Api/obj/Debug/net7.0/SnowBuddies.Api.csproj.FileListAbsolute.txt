@@ -47,3 +47,5 @@ c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Api\obj\Debug\net7.0
 c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Api\obj\Debug\net7.0\SnowBuddies.Api.pdb
 c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Api\obj\Debug\net7.0\SnowBuddies.Api.genruntimeconfig.cache
 c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Api\obj\Debug\net7.0\ref\SnowBuddies.Api.dll
+c:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Api\bin\Debug\net7.0\AutoMapper.dll
+C:\Users\DUICE\Software-Development\SnowBuddies\SnowBuddies.Api\bin\Debug\net7.0\AutoMapper.Extensions.Microsoft.DependencyInjection.dll
