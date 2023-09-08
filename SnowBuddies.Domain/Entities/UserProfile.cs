@@ -9,7 +9,7 @@ namespace SnowBuddies.Domain.Entities
     public class UserProfile
     {
         [Key]
-        public Guid ProfileId { get; set; }
+        public Guid? ProfileId { get; set; }
         public Guid UserId { get; set; }
 
         public string? ProfilePicture { get; set; }
