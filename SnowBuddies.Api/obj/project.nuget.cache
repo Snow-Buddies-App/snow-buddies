@@ -1,11 +1,14 @@
 {
   "version": 2,
-  "dgSpecHash": "MOhpanIIzkr7Dn7I41lPcXrYMrgnOTrtQ3oW2Gyl20pajVaZU/9N+KUiJT2Z0iI5SYHmuRn4IR+gYgT5Z4hrRA==",
+  "dgSpecHash": "Xpvfn2AzdBa4bp6cfOwHA78FtW59ve6odHGbw9zXPVhEiGv8+l6ysdYHLKCwd6kXxjknrVkihyiHrPUhyUgKDg==",
   "success": true,
-  "projectFilePath": "c:\\Users\\DUICE\\Software-Development\\SnowBuddies\\SnowBuddies.Api\\SnowBuddies.Api.csproj",
+  "projectFilePath": "C:\\Users\\DUICE\\Software-Development\\SnowBuddies\\SnowBuddies.Api\\SnowBuddies.Api.csproj",
   "expectedPackageFiles": [
+    "C:\\Users\\DUICE\\.nuget\\packages\\automapper\\12.0.1\\automapper.12.0.1.nupkg.sha512",
+    "C:\\Users\\DUICE\\.nuget\\packages\\automapper.extensions.microsoft.dependencyinjection\\12.0.1\\automapper.extensions.microsoft.dependencyinjection.12.0.1.nupkg.sha512",
     "C:\\Users\\DUICE\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\DUICE\\.nuget\\packages\\microsoft.aspnetcore.openapi\\7.0.10\\microsoft.aspnetcore.openapi.7.0.10.nupkg.sha512",
+    "C:\\Users\\DUICE\\.nuget\\packages\\microsoft.csharp\\4.7.0\\microsoft.csharp.4.7.0.nupkg.sha512",
     "C:\\Users\\DUICE\\.nuget\\packages\\microsoft.entityframeworkcore\\7.0.10\\microsoft.entityframeworkcore.7.0.10.nupkg.sha512",
     "C:\\Users\\DUICE\\.nuget\\packages\\microsoft.entityframeworkcore.abstractions\\7.0.10\\microsoft.entityframeworkcore.abstractions.7.0.10.nupkg.sha512",
     "C:\\Users\\DUICE\\.nuget\\packages\\microsoft.entityframeworkcore.analyzers\\7.0.10\\microsoft.entityframeworkcore.analyzers.7.0.10.nupkg.sha512",

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "HQtqi1bjupCBoYCa39pCqduFujLBTCar2h8Okl2exW95S0NcEmZG+oc2sVNOz+UR6Q2JXs75oPwdxxM+hJt0/Q==",
+  "dgSpecHash": "LDZRikOQn+0B1/Juypd3Meuv6qigAYrpnT653EaaS9Mivlg8HS8WufWDGyt77spUalGGeRX0hHwhpVnC1kIC8w==",
   "success": true,
-  "projectFilePath": "c:\\Users\\DUICE\\Software-Development\\SnowBuddies\\SnowBuddies.Infrastructure\\SnowBuddies.Infrastructure.csproj",
+  "projectFilePath": "C:\\Users\\DUICE\\Software-Development\\SnowBuddies\\SnowBuddies.Infrastructure\\SnowBuddies.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\DUICE\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
     "C:\\Users\\DUICE\\.nuget\\packages\\microsoft.entityframeworkcore\\7.0.10\\microsoft.entityframeworkcore.7.0.10.nupkg.sha512",
