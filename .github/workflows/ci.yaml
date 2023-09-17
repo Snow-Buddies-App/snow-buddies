@@ -19,7 +19,7 @@ jobs:
       uses: actions/setup-dotnet@v3
 
     - name: Restore dependencies
-      run: dotnet restore ./src/SnowBuddies.sln
+      run: dotnet restore SnowBuddies.sln
       
     - name: Build
-      run: dotnet build ./src/SnowBuddies.sln --configuration Release 
+      run: dotnet build SnowBuddies.sln --configuration Release
