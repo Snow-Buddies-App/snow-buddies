@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,7 +15,7 @@ namespace SnowBuddies.Application.Implementation.Services
         {
             _userRepository = userRepository;
         }
-        public List<User> GetAllUsers()
+        public IEnumerable<User> GetAllUsers()
         {
             return _userRepository.GetAllUsers();
         }
@@ -25,19 +25,37 @@ namespace SnowBuddies.Application.Implementation.Services
             return _userRepository.GetUserById(userId);
         }
 
-        public User DeleteUser(User user)
+        public bool DeleteUser(Guid userId)
         {
-            return _userRepository.DeleteUser(user);
+            var existingUser = _userRepository.GetUserById(userId);
+            if (existingUser == null) 
+            {
+                return false;
+            }
+            _userRepository.DeleteUser(existingUser);
+            return true;
         }
 
         public User UpdateUser(User user)
         {
-            return _userRepository.UpdateUser(user);
+            var existingUser = _userRepository.GetUserById(user.UserId);
+            if (existingUser == null) 
+            {
+                return null;
+            }
+            existingUser.FirstName = user.FirstName;
+            existingUser.LastName = user.LastName;
+            existingUser.Email = user.Email;
+            existingUser.DisplayName = user.DisplayName;
+            existingUser.AccountStatus = user.AccountStatus;
+            _userRepository.UpdateUser(existingUser);
+            return existingUser;
         }
 
         public User CreateUser(User user)
         {
-            return _userRepository.CreateUser(user);
+            _userRepository.CreateUser(user);
+            return user;
         }
     }
 }

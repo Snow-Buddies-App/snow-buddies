@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -16,37 +16,35 @@ namespace SnowBuddies.Infrastructure.Repositories
         {
             _context = context;
         }
-        public User CreateUser(User user)
+
+        public void DeleteUser(User user)
+        { 
+            _context.Users.Remove(user);
+                _context.SaveChanges();
+        }
+
+        public IEnumerable<User> GetAllUsers()
+        {
+            var users = _context.Users.ToList();
+            return users;
+        }
+
+        public User? GetUserById(Guid userId)
+        {
+            var user = _context.Users.FirstOrDefault(x => x.UserId == userId);
+            return user;
+        }
+
+        public void CreateUser(User user)
         {
             _context.Users.Add(user);
             _context.SaveChanges();
-            return user;
         }
 
-        public User DeleteUser(User user)
-        {
-            _context.Users.Remove(user);
-            _context.SaveChanges();
-            return user;
-        }
-
-        public List<User> GetAllUsers()
-        {
-            return _context.Users.ToList();
-        }
-
-        public User GetUserById(Guid userId)
-        {
-            return _context.Users.Find(userId);
-        }
-
-        public User UpdateUser(User user)
+        public void UpdateUser(User user)
         {
             _context.Users.Update(user);
             _context.SaveChanges();
-            return user;
-        }  
-        
-
+        }
     }
 }

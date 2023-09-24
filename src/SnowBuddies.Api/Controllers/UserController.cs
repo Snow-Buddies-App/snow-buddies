@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,9 +27,14 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<List<UserModel>> GetAllUsers()
+        public IActionResult GetAllUsers()
         {
-            return Ok(_userService.GetAllUsers());
+            var users = _userService.GetAllUsers();
+            if (users == null)
+            {
+                return NotFound();
+            }
+            return Ok(users);
         }
 
         [HttpGet("{userId}")]
@@ -38,45 +43,62 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> GetUserById(Guid userId)
+        public IActionResult GetUserById(Guid userId)
         {
-            return Ok(_userService.GetUserById(userId));
+            var existingUser = _userService.GetUserById(userId);
+            if (existingUser == null)
+            {
+                return NotFound("User doesn't exist");
+            }
+            return Ok(existingUser);
         }
 
         [HttpPost]
         [ProducesResponseType(typeof(UserModel), 201)]
-        [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> CreateUser(UserModel user)
+        public IActionResult CreateUser(UserModel user)
         {
             var mappedUser = _mapper.Map<User>(user);
-            return CreatedAtAction(nameof(GetUserById), new { userId = user.UserId }, _userService.CreateUser(mappedUser));
+            _userService.CreateUser(mappedUser);
+
+            return CreatedAtAction(nameof(GetUserById), new { userId = mappedUser.UserId }, mappedUser);
         }
 
         [HttpPut("{userId}")]
-        [ProducesResponseType(typeof(User), 200)]
-        [ProducesResponseType(201)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> UpdateUser(UserModel user)
+        public IActionResult UpdateUser(Guid userId, [FromBody] UserModel userModel)
         {
-            var mappedUser = _mapper.Map<User>(user);
-            return Ok(_userService.UpdateUser(mappedUser));
+            if (userId != userModel.UserId)
+            {
+                return BadRequest();
+            }
+            var existingUser = _mapper.Map<User>(userModel);
+            var updatedUser = _userService.UpdateUser(existingUser);
+            if (updatedUser == null)
+            {
+                return NotFound();
+            }
+            return Ok(updatedUser);
+
         }
 
         [HttpDelete("{userId}")]
-        [ProducesResponseType(typeof(User), 200)]
-        [ProducesResponseType(201)] 
+        [ProducesResponseType(204)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> DeleteUser(UserModel user)
+        public IActionResult DeleteUser(Guid userId)
         {
-        var mappedUser = _mapper.Map<User>(user);
-          return Ok(_userService.DeleteUser(mappedUser));
+            var isDeleted = _userService.DeleteUser(userId);
+            if (!isDeleted)
+            {
+                return NotFound("User not found");
+            }
+            return NoContent();
         }
-
     }
 }
