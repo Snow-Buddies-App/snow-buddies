@@ -23,3 +23,6 @@ jobs:
       
     - name: Build
       run: dotnet build SnowBuddies.sln --configuration Release
+    
+    - name: Test
+      run: dotnet test SnowBuddies.sln -c Release --no-build

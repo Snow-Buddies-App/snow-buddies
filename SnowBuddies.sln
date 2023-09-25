@@ -11,6 +11,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnowBuddies.Application", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SnowBuddies.Api", "src\SnowBuddies.Api\SnowBuddies.Api.csproj", "{1849298B-3A8E-45E1-9447-0C2AFCDC6C19}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{59F0270B-01E0-4F89-9C8D-F1895BB96251}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "tests\UnitTests\UnitTests.csproj", "{0398683B-F414-40CC-B5CE-DC921E78D459}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,5 +40,12 @@ Global
 		{1849298B-3A8E-45E1-9447-0C2AFCDC6C19}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1849298B-3A8E-45E1-9447-0C2AFCDC6C19}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1849298B-3A8E-45E1-9447-0C2AFCDC6C19}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0398683B-F414-40CC-B5CE-DC921E78D459}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0398683B-F414-40CC-B5CE-DC921E78D459}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0398683B-F414-40CC-B5CE-DC921E78D459}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0398683B-F414-40CC-B5CE-DC921E78D459}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{0398683B-F414-40CC-B5CE-DC921E78D459} = {59F0270B-01E0-4F89-9C8D-F1895BB96251}
 	EndGlobalSection
 EndGlobal
