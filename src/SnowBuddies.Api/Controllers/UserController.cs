@@ -15,11 +15,13 @@ namespace SnowBuddies.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IPasswordService _passwordService;
         private readonly IMapper _mapper;
-        public UserController(IUserService userService, IMapper mapper)
+        public UserController(IUserService userService, IMapper mapper, IPasswordService passwordService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _passwordService = passwordService;
         }
 
         [HttpGet]
@@ -27,10 +29,10 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            var users = _userService.GetAllUsers();
-            if (users == null)
+            var users = await _userService.GetAllUsers();
+            if (users == null || !users.Any())
             {
                 return NotFound();
             }
@@ -53,16 +55,28 @@ namespace SnowBuddies.Api.Controllers
             return Ok(existingUser);
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
         [ProducesResponseType(typeof(UserModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult CreateUser(UserModel user)
+        public IActionResult CreateUser(UserModel userModel)
         {
-            var mappedUser = _mapper.Map<User>(user);
-            _userService.CreateUser(mappedUser);
+            if (userModel == null)
+            {
+                return BadRequest("Invalid user data.");
+            }
+            _passwordService.CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            var newUser = new User()
+            {
+                DisplayName = userModel.DisplayName,
+                Email = userModel.Email,
+                PasswordSalt = passwordSalt,
+                PasswordHash = passwordHash,
+            };
 
-            return CreatedAtAction(nameof(GetUserById), new { userId = mappedUser.UserId }, mappedUser);
+            _userService.CreateUser(newUser);
+
+            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, newUser);
         }
 
         [HttpPut("{userId}")]
@@ -72,18 +86,21 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(500)]
         public IActionResult UpdateUser(Guid userId, [FromBody] UserModel userModel)
         {
-            if (userId != userModel.UserId)
+            var existingUser = _userService.GetUserById(userId);
+            if (existingUser == null)
             {
-                return BadRequest();
+                return NotFound("User not found");
             }
-            var existingUser = _mapper.Map<User>(userModel);
+
+            _mapper.Map(userModel, existingUser);
+
             var updatedUser = _userService.UpdateUser(existingUser);
             if (updatedUser == null)
             {
                 return NotFound();
             }
-            return Ok(updatedUser);
 
+            return Ok(updatedUser);
         }
 
         [HttpDelete("{userId}")]

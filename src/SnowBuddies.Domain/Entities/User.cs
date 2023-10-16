@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using SnowBuddies.Domain.Entities.Enums;
 
 namespace SnowBuddies.Domain.Entities;
 
@@ -20,16 +19,10 @@ public class User
     public string? Email { get; set; }
 
     [Required]
-    [Display(Name = "First Name")]
-    [MaxLength(30)]
-    public string? FirstName { get; set; }
+    public byte[] PasswordHash { get; set; } = new byte[32];
 
     [Required]
-    [Display(Name = "Last Name")]
-    [MaxLength(30)]
-    public string? LastName { get; set; }
+    public byte[] PasswordSalt { get; set; } = new byte[32];
     
-    public AccountStatus AccountStatus { get; set; }
-    
-    public virtual UserProfile UserProfile { get; set; } = null!;
+    public virtual UserProfile? UserProfile { get; set; } = null!;
 }

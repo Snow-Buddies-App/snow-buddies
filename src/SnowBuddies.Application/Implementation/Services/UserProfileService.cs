@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,30 +15,16 @@ namespace SnowBuddies.Application.Implementation.Services
         {
             _userProfileRepository = userProfileRepository;
         }
-
-        public List<UserProfile> GetAllUserProfiles()
+        public async Task<UserProfile> CreateUserProfile(UserProfile userProfile)
         {
-            return _userProfileRepository.GetAllUserProfiles();
-        }
-    
-        public UserProfile GetUserProfileById(Guid userProfileId)
-        {
-            return _userProfileRepository.GetUserProfileById(userProfileId);
-        }
-        public void DeleteUserProfile(UserProfile userProfile)
-        {
-            _userProfileRepository.DeleteUserProfile(userProfile);
+            await _userProfileRepository.AddAsync(userProfile);
+            await _userProfileRepository.SaveChangesAsync();
+            return userProfile;
         }
 
-        public void UpdateUserProfile(UserProfile userProfile)
+        public async Task<IEnumerable<UserProfile>> GetAllAsync()
         {
-            _userProfileRepository.UpdateUserProfile(userProfile);
+            return await _userProfileRepository.GetAllAsync();
         }
-        public void CreateUserProfile(UserProfile userProfile)
-        {
-            _userProfileRepository.CreateUserProfile(userProfile);
-        }
-        
-
     }
 }

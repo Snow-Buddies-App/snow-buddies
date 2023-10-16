@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using AutoMapper;
+using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
@@ -11,51 +13,91 @@ namespace SnowBuddies.Application.Implementation.Services
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        public UserService(IUserRepository userRepository)
+        private readonly IMapper _mapper;
+
+        public UserService(IUserRepository userRepository, IMapper mapper)
         {
             _userRepository = userRepository;
-        }
-        public IEnumerable<User> GetAllUsers()
-        {
-            return _userRepository.GetAllUsers();
+            _mapper = mapper;
         }
 
-        public User GetUserById(Guid userId)
+        public async Task<IEnumerable<UserDto>> GetAllUsers()
         {
-            return _userRepository.GetUserById(userId);
+            var users = await _userRepository.GetAllAsync();
+            return _mapper.Map<IEnumerable<UserDto>>(users);
+        }
+
+        public User? GetUserById(Guid userId)
+        {
+            return _userRepository.GetById(userId);
         }
 
         public bool DeleteUser(Guid userId)
         {
-            var existingUser = _userRepository.GetUserById(userId);
-            if (existingUser == null) 
+            var existingUser = _userRepository.GetById(userId);
+            if (existingUser == null)
             {
                 return false;
             }
-            _userRepository.DeleteUser(existingUser);
+            _userRepository.Remove(existingUser);
             return true;
         }
 
         public User UpdateUser(User user)
         {
-            var existingUser = _userRepository.GetUserById(user.UserId);
-            if (existingUser == null) 
+            var existingUser = _userRepository.GetById(user.UserId);
+
+            if (existingUser == null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(user));
             }
-            existingUser.FirstName = user.FirstName;
-            existingUser.LastName = user.LastName;
+            
             existingUser.Email = user.Email;
             existingUser.DisplayName = user.DisplayName;
-            existingUser.AccountStatus = user.AccountStatus;
-            _userRepository.UpdateUser(existingUser);
+            _userRepository.Update(existingUser);
+
             return existingUser;
         }
 
         public User CreateUser(User user)
         {
-            _userRepository.CreateUser(user);
-            return user;
+            if (string.IsNullOrWhiteSpace(user?.Email) || string.IsNullOrWhiteSpace(user?.DisplayName))
+            {
+                throw new ArgumentException("Email and DisplayName are required fields");
+            }
+
+            CheckIfUserExist(user.Email, user.DisplayName);
+
+            var newUser = new User
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                DisplayName = user.DisplayName,
+                PasswordHash = user.PasswordHash,
+                PasswordSalt = user.PasswordSalt,
+                UserProfile = new UserProfile(),
+            };
+    
+            _userRepository.Add(newUser);
+            _userRepository.SaveChanges();
+            
+            return newUser;
+        }
+
+        private bool CheckIfUserExist(string email, string displayName) 
+        {
+            var users = _userRepository.GetAll();
+
+            var userWithEmail = users.Any(u => u.Email == email);
+
+            var userWithDisplayName = users.Any(u => u.DisplayName == displayName);
+
+            if (userWithEmail && userWithDisplayName)
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
