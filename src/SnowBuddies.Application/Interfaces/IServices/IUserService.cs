@@ -9,10 +9,10 @@ namespace SnowBuddies.Application.Interfaces.IServices
 {
     public interface IUserService
     {
-        Task<IEnumerable<UserDto>> GetAllUsers();
-        User? GetUserById(Guid userId);
-        bool DeleteUser(Guid userId);
-        User UpdateUser(User user);
-        User CreateUser(User user);
+        Task<IEnumerable<UserDto>> GetAllUsersAsync();
+        Task<UserDto?> GetUserByIdAsync(Guid userId);
+        Task<bool> DeleteUserAsync(Guid userId);
+        Task<UserDto?> UpdateUserAsync(UserDto user);
+        Task<User> CreateUserAsync(User user);
     }
 }

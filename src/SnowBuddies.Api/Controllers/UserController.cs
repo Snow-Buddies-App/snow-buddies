@@ -31,7 +31,7 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userService.GetAllUsers();
+            var users = await _userService.GetAllUsersAsync();
             if (users == null || !users.Any())
             {
                 return NotFound();
@@ -45,9 +45,9 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult GetUserById(Guid userId)
+        public async Task<IActionResult> GetUserById(Guid userId)
         {
-            var existingUser = _userService.GetUserById(userId);
+            var existingUser = await _userService.GetUserByIdAsync(userId);
             if (existingUser == null)
             {
                 return NotFound("User doesn't exist");
@@ -59,7 +59,7 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(typeof(UserModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult CreateUser(UserModel userModel)
+        public async Task<IActionResult> CreateUser(UserModel userModel)
         {
             if (userModel == null)
             {
@@ -74,7 +74,7 @@ namespace SnowBuddies.Api.Controllers
                 PasswordHash = passwordHash,
             };
 
-            _userService.CreateUser(newUser);
+            await _userService.CreateUserAsync(newUser);
 
             return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, newUser);
         }
@@ -84,17 +84,16 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult UpdateUser(Guid userId, [FromBody] UserModel userModel)
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserModel userModel)
         {
-            var existingUser = _userService.GetUserById(userId);
+            var existingUser = await _userService.GetUserByIdAsync(userId);
             if (existingUser == null)
             {
                 return NotFound("User not found");
             }
-
             _mapper.Map(userModel, existingUser);
 
-            var updatedUser = _userService.UpdateUser(existingUser);
+            var updatedUser = await _userService.UpdateUserAsync(existingUser);
             if (updatedUser == null)
             {
                 return NotFound();
@@ -108,9 +107,9 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public IActionResult DeleteUser(Guid userId)
+        public async Task <IActionResult> DeleteUser(Guid userId)
         {
-            var isDeleted = _userService.DeleteUser(userId);
+            var isDeleted = await _userService.DeleteUserAsync(userId);
             if (!isDeleted)
             {
                 return NotFound("User not found");

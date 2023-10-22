@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using SnowBuddies.Domain.Entities;
 using SnowBuddies.Api.Models;
+using SnowBuddies.Application.Dtos;
 
 namespace SnowBuddies.Api.AutomapperConfig
 {
@@ -13,6 +14,7 @@ namespace SnowBuddies.Api.AutomapperConfig
         public SnowBuddiesProfile()
         {
             CreateMap<User, UserModel>().ReverseMap();
+            CreateMap<UserDto, UserModel>().ReverseMap();
         }
     }
 }

@@ -15,7 +15,6 @@ namespace SnowBuddies.Domain.Entities
 
         public Guid UserId { get; set; }
         public string? ProfilePicture { get; set; }
-
         public string? Bio { get; set; }
 
         [Display(Name = "First Name")]

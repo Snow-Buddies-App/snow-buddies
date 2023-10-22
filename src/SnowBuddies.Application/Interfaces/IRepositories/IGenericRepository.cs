@@ -9,11 +9,7 @@ namespace SnowBuddies.Application.Interfaces.IRepositories
 {
     public interface IGenericRepository<TEntity> where TEntity : class
     {
-        TEntity? GetById(Guid id);
-        IEnumerable<TEntity> GetAll();
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-        void Add(TEntity entity);
-        void AddRange(IEnumerable<TEntity> entities);
+        Task<TEntity?> GetByIdAsync(Guid id);
         Task AddAsync(TEntity entity, CancellationToken cancellationToken = default);
         Task AddRangeAsync(IEnumerable<TEntity> entities, CancellationToken cancellationToken = default);
         void Remove(TEntity entity);
@@ -24,6 +20,5 @@ namespace SnowBuddies.Application.Interfaces.IRepositories
         Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
         Task SaveChangesAsync();
-        void SaveChanges();
     }
 }

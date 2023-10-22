@@ -17,31 +17,7 @@ namespace SnowBuddies.Infrastructure.Repositories
         {
             _context = context;   
         }
-        public void Add(TEntity entity)
-        {
-            _context.Set<TEntity>().Add(entity);
-        }
-
-        public void AddRange(IEnumerable<TEntity> entities)
-        {
-            _context.Set<TEntity>().AddRange(entities);
-        }
-
-        public IEnumerable<TEntity> GetAll()
-        {
-            return _context.Set<TEntity>().AsEnumerable();
-        }
-
-        public IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate)
-        {
-           return _context.Set<TEntity>().Where(predicate);
-        }
-
-        public TEntity? GetById(Guid id)
-        {
-            return _context.Set<TEntity>().Find(id);
-        }
-
+       
         public void Remove(TEntity entity)
         {
             _context.Set<TEntity>().Remove(entity);
@@ -61,10 +37,9 @@ namespace SnowBuddies.Infrastructure.Repositories
         {
             _context.Set<TEntity>().UpdateRange(entities);
         }
-
-        public IEnumerable<TEntity> GetAll(Expression<Func<TEntity, bool>> predicate)
+        public async Task<TEntity?> GetByIdAsync(Guid id)
         {
-            return _context.Set<TEntity>().Where(predicate).AsEnumerable();
+            return await _context.Set<TEntity>().FindAsync(id);
         }
 
         public async Task<TEntity?> FindAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default)
@@ -95,11 +70,6 @@ namespace SnowBuddies.Infrastructure.Repositories
         public Task SaveChangesAsync()
         {
             return _context.SaveChangesAsync();
-        }
-
-        public void SaveChanges() 
-        {
-            _context.SaveChanges();
         }
     }
 

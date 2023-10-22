@@ -21,52 +21,63 @@ namespace SnowBuddies.Application.Implementation.Services
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<UserDto>> GetAllUsers()
+        public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        public User? GetUserById(Guid userId)
+        private async Task<bool> CheckIfUserExist(string email, string displayName) 
         {
-            return _userRepository.GetById(userId);
-        }
+            var users = await _userRepository.GetAllAsync();
 
-        public bool DeleteUser(Guid userId)
-        {
-            var existingUser = _userRepository.GetById(userId);
-            if (existingUser == null)
+            if(!users.Any(u => u.Email == email) && !users.Any(u => u.DisplayName == displayName)) 
             {
-                return false;
+                return true;
             }
-            _userRepository.Remove(existingUser);
-            return true;
+            return false;
         }
 
-        public User UpdateUser(User user)
+        public async Task<UserDto?> GetUserByIdAsync(Guid userId)
         {
-            var existingUser = _userRepository.GetById(user.UserId);
+            var user = await _userRepository.GetByIdAsync(userId);
+            return _mapper.Map<UserDto>(user);
+        }
 
-            if (existingUser == null)
+        public async Task<bool> DeleteUserAsync(Guid userId)
+        {
+            var existingUser = await _userRepository.GetByIdAsync(userId);
+            if(existingUser != null) 
+            {
+                _userRepository.Remove(existingUser);
+                await _userRepository.SaveChangesAsync();
+            }
+            return false;
+        }
+
+        public async Task<UserDto?> UpdateUserAsync(UserDto user)
+        {
+            var existingUser = await _userRepository.GetByIdAsync(user.UserId);
+            
+            if(existingUser == null) 
             {
                 throw new ArgumentNullException(nameof(user));
             }
-            
             existingUser.Email = user.Email;
             existingUser.DisplayName = user.DisplayName;
             _userRepository.Update(existingUser);
+            await _userRepository.SaveChangesAsync();
 
-            return existingUser;
+            return _mapper.Map<UserDto>(existingUser);
         }
 
-        public User CreateUser(User user)
+        public async Task<User> CreateUserAsync(User user)
         {
             if (string.IsNullOrWhiteSpace(user?.Email) || string.IsNullOrWhiteSpace(user?.DisplayName))
             {
                 throw new ArgumentException("Email and DisplayName are required fields");
             }
-
-            CheckIfUserExist(user.Email, user.DisplayName);
+            await CheckIfUserExist(user.Email, user.DisplayName);
 
             var newUser = new User
             {
@@ -77,27 +88,34 @@ namespace SnowBuddies.Application.Implementation.Services
                 PasswordSalt = user.PasswordSalt,
                 UserProfile = new UserProfile(),
             };
-    
-            _userRepository.Add(newUser);
-            _userRepository.SaveChanges();
-            
+            await _userRepository.AddAsync(newUser);
+            await _userRepository.SaveChangesAsync();
+
             return newUser;
         }
 
-        private bool CheckIfUserExist(string email, string displayName) 
+        public async Task<User?> CreateUser(User user)
         {
-            var users = _userRepository.GetAll();
-
-            var userWithEmail = users.Any(u => u.Email == email);
-
-            var userWithDisplayName = users.Any(u => u.DisplayName == displayName);
-
-            if (userWithEmail && userWithDisplayName)
+            if (string.IsNullOrWhiteSpace(user?.Email) || string.IsNullOrWhiteSpace(user?.DisplayName))
             {
-                return false;
+                throw new ArgumentException("Email and DisplayName are required fields");
             }
 
-            return true;
+            await CheckIfUserExist(user.Email, user.DisplayName);
+
+            var newUser = new User
+            {
+                UserId = user.UserId,
+                Email = user.Email,
+                DisplayName = user.DisplayName,
+                PasswordHash = user.PasswordHash,
+                PasswordSalt = user.PasswordSalt,
+                UserProfile = new UserProfile(),
+            };
+            await _userRepository.AddAsync(newUser);
+            await _userRepository.SaveChangesAsync();
+
+            return newUser;
         }
     }
 }

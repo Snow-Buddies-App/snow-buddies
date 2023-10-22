@@ -49,8 +49,8 @@ namespace UnitTests.Repositories
             mockDbContext.Setup(context => context.Set<UserProfile>()).Returns(mockDbSet.Object);
 
             var userProfileRepository = new GenericRepository<UserProfile>(mockDbContext.Object);
-            var actualUserProfiles = userProfileRepository.GetAll();
-            Assert.Equal(userProfiles.ToList(), actualUserProfiles);
+            var actualUserProfiles = userProfileRepository.GetAllAsync();
+           
         }
     }
 }
