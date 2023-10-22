@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using SnowBuddies.Infrastructure.Data;
@@ -11,9 +12,11 @@ using SnowBuddies.Infrastructure.Data;
 namespace SnowBuddies.Infrastructure.Migrations
 {
     [DbContext(typeof(SnowBuddiesDbContext))]
-    partial class SnowBuddiesDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231010200630_UpdateUsersAndUserProfilesTable")]
+    partial class UpdateUsersAndUserProfilesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,7 +41,7 @@ namespace SnowBuddies.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<byte[]>("PasswordHash")
+                    b.Property<byte[]>("Password")
                         .IsRequired()
                         .HasColumnType("bytea");
 
@@ -67,10 +70,12 @@ namespace SnowBuddies.Infrastructure.Migrations
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("FirstName")
+                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
                     b.Property<string>("LastName")
+                        .IsRequired()
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)");
 
