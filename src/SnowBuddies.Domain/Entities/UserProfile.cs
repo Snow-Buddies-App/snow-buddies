@@ -12,7 +12,6 @@ namespace SnowBuddies.Domain.Entities
     {
         [Key]
         public Guid UserProfileId { get; set; }
-
         public Guid UserId { get; set; }
         public string? ProfilePicture { get; set; }
         public string? Bio { get; set; }

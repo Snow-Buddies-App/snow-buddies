@@ -50,7 +50,7 @@ namespace UnitTests.Repositories
 
             var userProfileRepository = new GenericRepository<UserProfile>(mockDbContext.Object);
             var actualUserProfiles = userProfileRepository.GetAllAsync();
-           
+           Assert.NotNull(actualUserProfiles);
         }
     }
 }

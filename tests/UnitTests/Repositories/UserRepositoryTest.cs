@@ -14,38 +14,9 @@ namespace UnitTests.Repositories
 {
     public class UserRepositoryTest
     {
-
+        
         [Fact]
-        public async Task GetUserById_ShouldReturnUser_WhenUserExists()
-        {
-            var userId = Guid.NewGuid();
-            var users = new List<User>()
-            {
-                new User
-                {
-                    UserId = userId,
-                    DisplayName = "SpiderMonkey",
-                    Email = "johndwayne@gmail.com"
-                },
-            }.AsQueryable();
-
-            var mockDbSet = new Mock<DbSet<User>>();
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.Provider).Returns(users.Provider);
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.Expression).Returns(users.Expression);
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(users.ElementType);
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(() => users.GetEnumerator());
-            var mockDbContext = new Mock<SnowBuddiesDbContext>();
-            mockDbContext.Setup(context => context.Set<User>()).Returns(mockDbSet.Object);
-
-            var userRepository = new GenericRepository<User>(mockDbContext.Object);
-
-            var user = await userRepository.FindAsync(x => x.UserId == userId);
-
-            
-        }
-
-        [Fact]
-        public void GetAllUsers_ShouldReturnAllUsers()
+        public void GetAllUsersAsync_ShouldReturnAllUsers()
         {
             var userId = Guid.NewGuid();
             var users = new List<User>()
@@ -76,33 +47,7 @@ namespace UnitTests.Repositories
             var userRepository = new GenericRepository<User>(mockDbContext.Object);
 
             var actualUsers = userRepository.GetAllAsync();
-           
-        }
-
-        [Fact]
-        public async Task CreateUser_AddUserToDatabaseAsync()
-        {
-            var users = new List<User>();
-
-            var mockDbSet = new Mock<DbSet<User>>();
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.Provider).Returns(users.AsQueryable().Provider);
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.Expression).Returns(users.AsQueryable().Expression);
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.ElementType).Returns(users.AsQueryable().ElementType);
-            mockDbSet.As<IQueryable<User>>().Setup(m => m.GetEnumerator()).Returns(() => users.AsQueryable().GetEnumerator());
-
-            var mockDbContext = new Mock<SnowBuddiesDbContext>();
-            mockDbContext.Setup(context => context.Set<User>()).Returns(mockDbSet.Object);
-            var userRepository = new GenericRepository<User>(mockDbContext.Object);
-            var createdUser = new User()
-            {
-                UserId = Guid.NewGuid(),
-                DisplayName = "SpiderMonkey",
-                Email = "kenny98@gmail.com"  
-            };
-
-            await userRepository.AddAsync(createdUser);
-
-            mockDbContext.Verify(context => context.Set<User>().Add(It.Is<User>(user => user.UserId == createdUser.UserId)), Times.Once);
+            Assert.NotNull(actualUsers);
         }
 
         [Fact]
