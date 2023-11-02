@@ -1,11 +1,12 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
-using SnowBuddies.Infrastructure.Repositories;
+using Microsoft.IdentityModel.Tokens;
 using Npgsql;
-using SnowBuddies.Infrastructure.Data;
-using AutoMapper;
-using SnowBuddies.Application.Interfaces.IServices;
-using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Implementation.Services;
+using SnowBuddies.Application.Interfaces.IRepositories;
+using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Infrastructure.Data;
+using SnowBuddies.Infrastructure.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -33,6 +34,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddAutoMapper(typeof(Program));
 
+var jwtSettings = builder.Configuration.GetSection("JWTSettings");
+builder.Services.AddAuthentication(opt =>
+{
+    opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = jwtSettings.GetValue<string>("validIssuer"),
+        ValidAudience = jwtSettings.GetValue<string>("validAudience"),
+        IssuerSigningKey = new SymmetricSecurityKey((new System.Text.UTF8Encoding()).GetBytes(jwtSettings.GetValue<string>("securityKey").ToCharArray()))
+    };
+});
+
 
 var app = builder.Build();
 
@@ -44,6 +64,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
