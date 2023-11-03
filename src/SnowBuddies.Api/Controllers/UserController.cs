@@ -11,13 +11,11 @@ namespace SnowBuddies.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly IPasswordService _passwordService;
         private readonly IMapper _mapper;
-        public UserController(IUserService userService, IMapper mapper, IPasswordService passwordService)
+        public UserController(IUserService userService, IMapper mapper)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-            _passwordService = passwordService;
         }
 
         [HttpGet]
@@ -25,10 +23,10 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAllUsers()
+        public IActionResult GetAllUsers()
         {
-            var users = await _userService.GetAllUsersAsync();
-            if (users == null || !users.Any())
+            var users = _userService.GetAllUsers();
+            if (users == null)
             {
                 return NotFound();
             }
@@ -41,9 +39,9 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> GetUserById(Guid userId)
+        public IActionResult GetUserById(Guid userId)
         {
-            var existingUser = await _userService.GetUserByIdAsync(userId);
+            var existingUser = _userService.GetUserById(userId);
             if (existingUser == null)
             {
                 return NotFound("User doesn't exist");
@@ -51,28 +49,16 @@ namespace SnowBuddies.Api.Controllers
             return Ok(existingUser);
         }
 
-        [HttpPost("Register")]
+        [HttpPost]
         [ProducesResponseType(typeof(UserModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> CreateUser(UserModel userModel)
+        public IActionResult CreateUser(UserModel user)
         {
-            if (userModel == null)
-            {
-                return BadRequest("Invalid user data.");
-            }
-            _passwordService.CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
-            var newUser = new User()
-            {
-                DisplayName = userModel.DisplayName,
-                Email = userModel.Email,
-                PasswordSalt = passwordSalt,
-                PasswordHash = passwordHash,
-            };
+            var mappedUser = _mapper.Map<User>(user);
+            _userService.CreateUser(mappedUser);
 
-            await _userService.CreateUserAsync(newUser);
-
-            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, newUser);
+            return CreatedAtAction(nameof(GetUserById), new { userId = mappedUser.UserId }, mappedUser);
         }
 
         [HttpPut("{userId}")]
@@ -80,22 +66,20 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserModel userModel)
+        public IActionResult UpdateUser(Guid userId, [FromBody] UserModel userModel)
         {
-            var existingUser = await _userService.GetUserByIdAsync(userId);
-            if (existingUser == null)
+            if (userId != userModel.UserId)
             {
-                return NotFound("User not found");
+                return BadRequest();
             }
-            _mapper.Map(userModel, existingUser);
-
-            var updatedUser = await _userService.UpdateUserAsync(existingUser);
+            var existingUser = _mapper.Map<User>(userModel);
+            var updatedUser = _userService.UpdateUser(existingUser);
             if (updatedUser == null)
             {
                 return NotFound();
             }
-
             return Ok(updatedUser);
+
         }
 
         [HttpDelete("{userId}")]
@@ -103,9 +87,9 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> DeleteUser(Guid userId)
+        public async Task<IActionResult> DeleteUser(Guid userId)]
         {
-            var isDeleted = await _userService.DeleteUserAsync(userId);
+            var isDeleted = _userService.DeleteUser(userId);
             if (!isDeleted)
             {
                 return NotFound("User not found");

@@ -4,6 +4,7 @@
 *.suo
 *.user
 *.sln.docstates
+*.v2
 
 # Ignore build output and logs
 bin/

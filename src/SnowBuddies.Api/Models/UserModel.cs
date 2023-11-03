@@ -4,6 +4,8 @@ namespace SnowBuddies.Api.Models
 {
     public class UserModel
     {
+        public Guid UserId { get; set; }
+
         [Required(ErrorMessage = "Field required")]
         [MaxLength(30)]
         [Display(Name = "Display Name")]
@@ -14,10 +16,16 @@ namespace SnowBuddies.Api.Models
         [Display(Name = "Email")]
         public string? Email { get; set; }
 
-        [Required, MinLength(6)]
-        public string Password { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Field required")]
+        [Display(Name = "First Name")]
+        [MaxLength(30)]
+        public string? FirstName { get; set; }
 
-        [Required, Compare("Password")]
-        public string ConfirmPassword { get; set; } = string.Empty;
+        [Required(ErrorMessage = "Field required")]
+        [Display(Name = "Last Name")]
+        [MaxLength(30)]
+        public string? LastName { get; set; }
+
+        public AccountStatus AccountStatus { get; set; }
     }
 }

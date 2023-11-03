@@ -17,7 +17,7 @@ namespace SnowBuddies.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("ProductVersion", "7.0.10")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -27,6 +27,9 @@ namespace SnowBuddies.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
+
+                    b.Property<int>("AccountStatus")
+                        .HasColumnType("integer");
 
                     b.Property<string>("DisplayName")
                         .IsRequired()
@@ -38,13 +41,15 @@ namespace SnowBuddies.Infrastructure.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
 
-                    b.Property<byte[]>("PasswordHash")
+                    b.Property<string>("FirstName")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
 
-                    b.Property<byte[]>("PasswordSalt")
+                    b.Property<string>("LastName")
                         .IsRequired()
-                        .HasColumnType("bytea");
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
 
                     b.HasKey("UserId");
 
@@ -53,26 +58,12 @@ namespace SnowBuddies.Infrastructure.Migrations
 
             modelBuilder.Entity("SnowBuddies.Domain.Entities.UserProfile", b =>
                 {
-                    b.Property<Guid>("UserProfileId")
+                    b.Property<Guid>("ProfileId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<int>("AccountStatus")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Bio")
                         .HasColumnType("text");
-
-                    b.Property<DateTime>("DateOfBirth")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("FirstName")
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
-
-                    b.Property<string>("LastName")
-                        .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
 
                     b.Property<string>("ProfilePicture")
                         .HasColumnType("text");
@@ -80,7 +71,7 @@ namespace SnowBuddies.Infrastructure.Migrations
                     b.Property<Guid>("UserId")
                         .HasColumnType("uuid");
 
-                    b.HasKey("UserProfileId");
+                    b.HasKey("ProfileId");
 
                     b.HasIndex("UserId")
                         .IsUnique();
@@ -101,7 +92,8 @@ namespace SnowBuddies.Infrastructure.Migrations
 
             modelBuilder.Entity("SnowBuddies.Domain.Entities.User", b =>
                 {
-                    b.Navigation("UserProfile");
+                    b.Navigation("UserProfile")
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
