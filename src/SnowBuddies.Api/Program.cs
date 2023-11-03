@@ -1,13 +1,3 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Npgsql;
-using SnowBuddies.Application.AutoMapperConfiguration;
-using SnowBuddies.Application.Implementation.Services;
-using SnowBuddies.Application.Interfaces.IRepositories;
-using SnowBuddies.Application.Interfaces.IServices;
-using SnowBuddies.Infrastructure.Data;
-using SnowBuddies.Infrastructure.Repositories;
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 
@@ -22,19 +12,16 @@ var fullConnectionString = npgsqlConStrBuilder.ToString();
 // Add services to the container.
 
 builder.Services.AddControllers();
-builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-
 
 builder.Services.AddDbContext<SnowBuddiesDbContext>(options => options.UseNpgsql(fullConnectionString));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAutoMapper(typeof(ApplicationProfile), typeof(Program));
+builder.Services.AddAutoMapper(typeof(Program));
 
 
 var app = builder.Build();
