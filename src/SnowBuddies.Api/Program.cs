@@ -1,13 +1,11 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using SnowBuddies.Infrastructure.Repositories;
 using Npgsql;
-using SnowBuddies.Infrastructure.Data;
-using AutoMapper;
-using SnowBuddies.Application.Interfaces.IServices;
-using SnowBuddies.Application.Interfaces.IRepositories;
-using SnowBuddies.Application.Implementation.Services;
-using System.Text.Json.Serialization;
 using SnowBuddies.Application.AutoMapperConfiguration;
+using SnowBuddies.Application.Implementation.Services;
+using SnowBuddies.Application.Interfaces.IRepositories;
+using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Infrastructure.Data;
+using SnowBuddies.Infrastructure.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
