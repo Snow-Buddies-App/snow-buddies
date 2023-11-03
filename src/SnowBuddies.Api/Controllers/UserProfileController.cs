@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc;]
-using SnowBuddies.Application.Interfaces.IServices;]
+using Microsoft.AspNetCore.Mvc;
+using SnowBuddies.Application.Interfaces.IServices;
 
 namespace SnowBuddies.Api.Controllers
 {
