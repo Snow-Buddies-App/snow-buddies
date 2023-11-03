@@ -1,3 +1,12 @@
+﻿using Microsoft.EntityFrameworkCore;
+using Npgsql;
+using SnowBuddies.Application.Implementation.Services;
+using SnowBuddies.Application.Interfaces.IRepositories;
+using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Infrastructure.Data;
+using SnowBuddies.Infrastructure.Repositories;
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 
