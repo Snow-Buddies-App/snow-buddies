@@ -27,15 +27,14 @@ namespace SnowBuddies.Application.Implementation.Services
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        private async Task<bool> CheckIfUserExist(string email, string displayName) 
+        private async Task CheckIfUserExist(string email, string displayName)
         {
             var users = await _userRepository.GetAllAsync();
 
-            if(!users.Any(u => u.Email == email) && !users.Any(u => u.DisplayName == displayName)) 
+            if (users.Any(u => u.Email == email || u.DisplayName == displayName))
             {
-                return true;
+                throw new ArgumentNullException();
             }
-            return false;
         }
 
         public async Task<UserDto?> GetUserByIdAsync(Guid userId)
@@ -51,6 +50,7 @@ namespace SnowBuddies.Application.Implementation.Services
             {
                 _userRepository.Remove(existingUser);
                 await _userRepository.SaveChangesAsync();
+                return true;
             }
             return false;
         }
@@ -77,30 +77,6 @@ namespace SnowBuddies.Application.Implementation.Services
             {
                 throw new ArgumentException("Email and DisplayName are required fields");
             }
-            await CheckIfUserExist(user.Email, user.DisplayName);
-
-            var newUser = new User
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                DisplayName = user.DisplayName,
-                PasswordHash = user.PasswordHash,
-                PasswordSalt = user.PasswordSalt,
-                UserProfile = new UserProfile(),
-            };
-            await _userRepository.AddAsync(newUser);
-            await _userRepository.SaveChangesAsync();
-
-            return newUser;
-        }
-
-        public async Task<User?> CreateUser(User user)
-        {
-            if (string.IsNullOrWhiteSpace(user?.Email) || string.IsNullOrWhiteSpace(user?.DisplayName))
-            {
-                throw new ArgumentException("Email and DisplayName are required fields");
-            }
-
             await CheckIfUserExist(user.Email, user.DisplayName);
 
             var newUser = new User
