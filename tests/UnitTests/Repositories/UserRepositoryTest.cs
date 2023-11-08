@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Moq;
 using SnowBuddies.Domain.Entities;
-using SnowBuddies.Domain.Entities.Enums;
 using SnowBuddies.Infrastructure.Data;
 using SnowBuddies.Infrastructure.Repositories;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace UnitTests.Repositories
 {
@@ -22,19 +15,19 @@ namespace UnitTests.Repositories
             var userId = Guid.NewGuid();
             var users = new List<User>()
             {
-                new User{UserId = userId,
-                        FirstName = "John",
-                        LastName = "Dwayne",
-                        DisplayName = "SpiderMonkey",
-                        AccountStatus = AccountStatus.active,
-                        Email = "johndwayne@gmail.com"},
+                new User
+                {
+                    UserId = userId,
+                    DisplayName = "SpiderMonk",
+                    Email = "johndwayne@gmail.com"
+                },
 
-                new User{UserId = userId,
-                        FirstName = "Daniel",
-                        LastName ="Kenneth",
-                        DisplayName ="Sigma",
-                        AccountStatus = AccountStatus.suspended,
-                        Email = "kenny98@gmail.com"}
+                new User
+                {
+                    UserId = userId,
+                    DisplayName = "SpiderMonkey",
+                    Email = "kenny98@gmail.com"
+                }
             }.AsQueryable();
 
             var mockDbSet = new Mock<DbSet<User>>();
@@ -58,19 +51,19 @@ namespace UnitTests.Repositories
             var userId = Guid.NewGuid();
             var users = new List<User>()
             {
-                new User{UserId = userId, 
-                        FirstName = "John", 
-                        LastName = "Dwayne", 
-                        DisplayName = "SpiderMonkey", 
-                        AccountStatus = AccountStatus.active, 
-                        Email = "johndwayne@gmail.com"},
+                new User
+                {
+                    UserId = userId,
+                    DisplayName = "SpiderMonk",
+                    Email = "johndwayne@gmail.com"
+                },
 
-                new User{UserId = userId, 
-                        FirstName = "Daniel", 
-                        LastName ="Kenneth", 
-                        DisplayName ="Sigma", 
-                        AccountStatus = AccountStatus.suspended, 
-                        Email = "kenny98@gmail.com"}
+                new User
+                {
+                    UserId = userId,
+                    DisplayName = "SpiderMonkey",
+                    Email = "kenny98@gmail.com"
+                }
             }.AsQueryable();
 
             var mockDbSet = new Mock<DbSet<User>>();
@@ -104,13 +97,10 @@ namespace UnitTests.Repositories
             var createdUser = new User()
             {
                 UserId = Guid.NewGuid(),
-                FirstName = "Daniel",
-                LastName = "Kenneth",
                 DisplayName = "Sigma",
-                AccountStatus = AccountStatus.suspended,
                 Email = "kenny98@gmail.com"
             };
-            
+
             userRepository.CreateUser(createdUser);
 
             mockDbContext.Verify(context => context.Users.Add(It.Is<User>(user => user.UserId == createdUser.UserId)), Times.Once);
@@ -118,27 +108,21 @@ namespace UnitTests.Repositories
         }
 
         [Fact]
-        public void DeleteUser_ShouldRemoveUserFromDatabase() 
+        public void DeleteUser_ShouldRemoveUserFromDatabase()
         {
             var users = new List<User>()
             {
                 new User
                 {
                     UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa5"),
-                    FirstName = "John",
-                    LastName = "Dwayne",
                     DisplayName = "SpiderMonkey",
-                    AccountStatus = AccountStatus.active,
                     Email = "johndwayne@gmail.com"
                 },
 
                 new User
                 {
                     UserId = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6"),
-                    FirstName = "Daniel",
-                    LastName ="Kenneth",
                     DisplayName ="Sigma",
-                    AccountStatus = AccountStatus.suspended,
                     Email = "kenny98@gmail.com"
                 }
             }.AsQueryable();
@@ -161,7 +145,7 @@ namespace UnitTests.Repositories
         }
 
         [Fact]
-        public void UpdateUser_ShouldUpdateUserInDatabase() 
+        public void UpdateUser_ShouldUpdateUserInDatabase()
         {
             var userId = Guid.NewGuid();
             var users = new List<User>()
@@ -169,10 +153,7 @@ namespace UnitTests.Repositories
                 new User
                 {
                     UserId = userId,
-                    FirstName = "John",
-                    LastName = "Dwayne",
                     DisplayName = "SpiderMonkey",
-                    AccountStatus = AccountStatus.active,
                     Email = "johndwayne@gmail.com"
                 },
             }.AsQueryable();
@@ -187,8 +168,7 @@ namespace UnitTests.Repositories
             mockDbContext.Setup(context => context.Users).Returns(mockDbSet.Object);
             var userRepository = new UserRepository(mockDbContext.Object);
             var updatedUser = users.First();
-            updatedUser.AccountStatus = AccountStatus.inactive;
-            
+
             userRepository.UpdateUser(updatedUser);
 
             mockDbContext.Verify(context => context.Users.Update(It.Is<User>(user => user.UserId == updatedUser.UserId)), Times.Once);

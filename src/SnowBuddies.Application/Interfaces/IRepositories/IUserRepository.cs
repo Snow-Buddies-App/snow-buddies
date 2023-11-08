@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SnowBuddies.Domain.Entities;
+﻿using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Application.Interfaces.IRepositories
 {
-    public interface IUserRepository
+    public interface IUserRepository : IGenericRepository<User>
     {
         public IEnumerable<User> GetAllUsers();
 

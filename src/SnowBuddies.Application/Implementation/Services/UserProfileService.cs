@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SnowBuddies.Application.Interfaces.IRepositories;
+﻿using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 
@@ -20,7 +16,7 @@ namespace SnowBuddies.Application.Implementation.Services
         {
             return _userProfileRepository.GetAllUserProfiles();
         }
-    
+
         public UserProfile GetUserProfileById(Guid userProfileId)
         {
             return _userProfileRepository.GetUserProfileById(userProfileId);
@@ -38,7 +34,12 @@ namespace SnowBuddies.Application.Implementation.Services
         {
             _userProfileRepository.CreateUserProfile(userProfile);
         }
-        
+
+        public async Task<IEnumerable<UserProfile>> GetAllAsync()
+        {
+            return await _userProfileRepository.GetAllAsync();
+        }
+
 
     }
 }
