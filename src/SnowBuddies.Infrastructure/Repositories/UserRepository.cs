@@ -1,26 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
-using SnowBuddies.Application.Interfaces.IRepositories;
+﻿using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Domain.Entities;
 using SnowBuddies.Infrastructure.Data;
 
 namespace SnowBuddies.Infrastructure.Repositories
 {
-    public class UserRepository : IUserRepository
+    public class UserRepository : GenericRepository<User>, IUserRepository
     {
         private readonly SnowBuddiesDbContext _context;
-        public UserRepository(SnowBuddiesDbContext context)
+        public UserRepository(SnowBuddiesDbContext context) : base(context)
         {
             _context = context;
         }
 
         public void DeleteUser(User user)
-        { 
+        {
             _context.Users.Remove(user);
-                _context.SaveChanges();
+            _context.SaveChanges();
         }
 
         public IEnumerable<User> GetAllUsers()

@@ -12,34 +12,16 @@ namespace SnowBuddies.Application.Implementation.Services
             _userProfileRepository = userProfileRepository;
         }
 
-        public List<UserProfile> GetAllUserProfiles()
+        public async Task<UserProfile> CreateUserProfile(UserProfile userProfile)
         {
-            return _userProfileRepository.GetAllUserProfiles();
-        }
-
-        public UserProfile GetUserProfileById(Guid userProfileId)
-        {
-            return _userProfileRepository.GetUserProfileById(userProfileId);
-        }
-        public void DeleteUserProfile(UserProfile userProfile)
-        {
-            _userProfileRepository.DeleteUserProfile(userProfile);
-        }
-
-        public void UpdateUserProfile(UserProfile userProfile)
-        {
-            _userProfileRepository.UpdateUserProfile(userProfile);
-        }
-        public void CreateUserProfile(UserProfile userProfile)
-        {
-            _userProfileRepository.CreateUserProfile(userProfile);
+            await _userProfileRepository.AddAsync(userProfile);
+            await _userProfileRepository.SaveChangesAsync();
+            return userProfile;
         }
 
         public async Task<IEnumerable<UserProfile>> GetAllAsync()
         {
             return await _userProfileRepository.GetAllAsync();
         }
-
-
     }
 }

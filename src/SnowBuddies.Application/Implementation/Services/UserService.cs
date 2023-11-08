@@ -1,4 +1,5 @@
-﻿using SnowBuddies.Application.Dtos;
+﻿using AutoMapper;
+using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
