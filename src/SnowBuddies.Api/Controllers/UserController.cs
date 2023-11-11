@@ -53,7 +53,7 @@ namespace SnowBuddies.Api.Controllers
             return Ok(existingUser);
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
         [ProducesResponseType(typeof(UserModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
