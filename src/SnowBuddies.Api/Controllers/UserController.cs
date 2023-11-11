@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SnowBuddies.Api.Models;
+using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 
@@ -75,8 +76,13 @@ namespace SnowBuddies.Api.Controllers
             };
 
             await _userService.CreateUserAsync(newUser);
-
-            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, newUser);
+            var responseUserModel = new UserDto()
+            {
+                UserId = newUser.UserId,
+                DisplayName = newUser.DisplayName,
+                Email = newUser.Email,
+            };
+            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, responseUserModel);
         }
 
         [HttpPut("{userId}")]

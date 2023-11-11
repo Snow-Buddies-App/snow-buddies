@@ -98,7 +98,7 @@ namespace UnitTests.Services
         }
 
         [Fact]
-        public async Task CreateUserAsync_ShouldAddUserToDatabase() 
+        public async Task CreateUserAsync_ShouldAddUserToDatabase()
         {
             var userId = Guid.NewGuid();
             var user = new User()
@@ -119,7 +119,7 @@ namespace UnitTests.Services
         }
 
         [Fact]
-        public async Task CreateUserAsync_ShouldReturnFalseIfUserAlreadyExists() 
+        public async Task CreateUserAsync_ShouldReturnFalseIfUserAlreadyExists()
         {
             var userId = Guid.NewGuid();
             var cancellationToken = CancellationToken.None;
@@ -132,7 +132,7 @@ namespace UnitTests.Services
 
             _mockUserRepository.Setup(repo => repo.GetAllAsync(cancellationToken)).ReturnsAsync(new List<User> { existingUser });
 
-            await Assert.ThrowsAsync<ArgumentNullException>(() => _userService.CreateUserAsync(existingUser));
+            await Assert.ThrowsAsync<ArgumentException>(() => _userService.CreateUserAsync(existingUser));
         }
 
         [Fact]

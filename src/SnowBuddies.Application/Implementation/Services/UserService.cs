@@ -33,7 +33,7 @@ namespace SnowBuddies.Application.Implementation.Services
 
             if (users.Any(u => u.Email == email || u.DisplayName == displayName))
             {
-                throw new ArgumentNullException();
+                throw new ArgumentException("User already exist");
             }
         }
 
@@ -75,23 +75,13 @@ namespace SnowBuddies.Application.Implementation.Services
         {
             if (string.IsNullOrWhiteSpace(user?.Email) || string.IsNullOrWhiteSpace(user?.DisplayName))
             {
-                throw new ArgumentException("Email and DisplayName are required fields");
+                throw new ArgumentNullException("Email and DisplayName are required fields");
             }
             await CheckIfUserExist(user.Email, user.DisplayName);
-
-            var newUser = new User
-            {
-                UserId = user.UserId,
-                Email = user.Email,
-                DisplayName = user.DisplayName,
-                PasswordHash = user.PasswordHash,
-                PasswordSalt = user.PasswordSalt,
-                UserProfile = new UserProfile(),
-            };
-            await _userRepository.AddAsync(newUser);
+            await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
-            return newUser;
+            return user;
         }
     }
 }
