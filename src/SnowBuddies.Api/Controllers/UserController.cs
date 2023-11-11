@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SnowBuddies.Api.Models;
 using SnowBuddies.Application.Dtos;
@@ -23,6 +19,7 @@ namespace SnowBuddies.Api.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _passwordService = passwordService;
+
         }
 
         [HttpGet]
@@ -56,7 +53,7 @@ namespace SnowBuddies.Api.Controllers
             return Ok(existingUser);
         }
 
-        [HttpPost("Register")]
+        [HttpPost]
         [ProducesResponseType(typeof(UserModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
@@ -113,7 +110,7 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task <IActionResult> DeleteUser(Guid userId)
+        public async Task<IActionResult> DeleteUser(Guid userId)
         {
             var isDeleted = await _userService.DeleteUserAsync(userId);
             if (!isDeleted)

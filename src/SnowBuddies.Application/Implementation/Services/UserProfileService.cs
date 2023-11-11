@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SnowBuddies.Application.Interfaces.IRepositories;
+﻿using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 
@@ -15,6 +11,7 @@ namespace SnowBuddies.Application.Implementation.Services
         {
             _userProfileRepository = userProfileRepository;
         }
+
         public async Task<UserProfile> CreateUserProfile(UserProfile userProfile)
         {
             await _userProfileRepository.AddAsync(userProfile);
