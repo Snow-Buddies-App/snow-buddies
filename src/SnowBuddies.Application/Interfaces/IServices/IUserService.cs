@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SnowBuddies.Application.Dtos;
+﻿using SnowBuddies.Application.Dtos;
 using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Application.Interfaces.IServices
