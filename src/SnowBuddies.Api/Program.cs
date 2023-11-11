@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Npgsql;
+using SnowBuddies.Application.AutoMapperConfiguration;
 using SnowBuddies.Application.Implementation.Services;
 using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
@@ -27,12 +28,12 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IUserProfileRepository, UserProfileRepository>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
-
+builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddDbContext<SnowBuddiesDbContext>(options => options.UseNpgsql(fullConnectionString));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddAutoMapper(typeof(Program), typeof(ApplicationProfile));
 
 var jwtSettings = builder.Configuration.GetSection("JWTSettings");
 builder.Services.AddAuthentication(opt =>
