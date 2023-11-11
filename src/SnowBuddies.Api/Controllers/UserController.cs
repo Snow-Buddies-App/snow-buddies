@@ -1,10 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SnowBuddies.Api.Models;
+using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 
@@ -15,11 +12,14 @@ namespace SnowBuddies.Api.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IPasswordService _passwordService;
         private readonly IMapper _mapper;
-        public UserController(IUserService userService, IMapper mapper)
+        public UserController(IUserService userService, IMapper mapper, IPasswordService passwordService)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _passwordService = passwordService;
+
         }
 
         [HttpGet]
@@ -27,9 +27,14 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<List<UserModel>> GetAllUsers()
+        public async Task<IActionResult> GetAllUsers()
         {
-            return Ok(_userService.GetAllUsers());
+            var users = await _userService.GetAllUsersAsync();
+            if (users == null || !users.Any())
+            {
+                return NotFound();
+            }
+            return Ok(users);
         }
 
         [HttpGet("{userId}")]
@@ -38,45 +43,81 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> GetUserById(Guid userId)
+        public async Task<IActionResult> GetUserById(Guid userId)
         {
-            return Ok(_userService.GetUserById(userId));
+            var existingUser = await _userService.GetUserByIdAsync(userId);
+            if (existingUser == null)
+            {
+                return NotFound("User doesn't exist");
+            }
+            return Ok(existingUser);
         }
 
-        [HttpPost]
+        [HttpPost("Register")]
         [ProducesResponseType(typeof(UserModel), 201)]
-        [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> CreateUser(UserModel user)
+        public async Task<IActionResult> CreateUser(UserModel userModel)
         {
-            var mappedUser = _mapper.Map<User>(user);
-            return CreatedAtAction(nameof(GetUserById), new { userId = user.UserId }, _userService.CreateUser(mappedUser));
+            if (userModel == null)
+            {
+                return BadRequest("Invalid user data.");
+            }
+            _passwordService.CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            var newUser = new User()
+            {
+                DisplayName = userModel.DisplayName,
+                Email = userModel.Email,
+                PasswordSalt = passwordSalt,
+                PasswordHash = passwordHash,
+            };
+
+            await _userService.CreateUserAsync(newUser);
+            var responseUserModel = new UserDto()
+            {
+                UserId = newUser.UserId,
+                DisplayName = newUser.DisplayName,
+                Email = newUser.Email,
+            };
+            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, responseUserModel);
         }
 
         [HttpPut("{userId}")]
-        [ProducesResponseType(typeof(User), 200)]
-        [ProducesResponseType(201)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> UpdateUser(UserModel user)
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserModel userModel)
         {
-            var mappedUser = _mapper.Map<User>(user);
-            return Ok(_userService.UpdateUser(mappedUser));
+            var existingUser = await _userService.GetUserByIdAsync(userId);
+            if (existingUser == null)
+            {
+                return NotFound("User not found");
+            }
+            _mapper.Map(userModel, existingUser);
+
+            var updatedUser = await _userService.UpdateUserAsync(existingUser);
+            if (updatedUser == null)
+            {
+                return NotFound();
+            }
+
+            return Ok(updatedUser);
         }
 
         [HttpDelete("{userId}")]
-        [ProducesResponseType(typeof(User), 200)]
-        [ProducesResponseType(201)] 
+        [ProducesResponseType(204)]
         [ProducesResponseType(404)]
+        [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public ActionResult<UserModel> DeleteUser(UserModel user)
+        public async Task<IActionResult> DeleteUser(Guid userId)
         {
-        var mappedUser = _mapper.Map<User>(user);
-          return Ok(_userService.DeleteUser(mappedUser));
+            var isDeleted = await _userService.DeleteUserAsync(userId);
+            if (!isDeleted)
+            {
+                return NotFound("User not found");
+            }
+            return NoContent();
         }
-
     }
 }

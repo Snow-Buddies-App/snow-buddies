@@ -1,17 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using SnowBuddies.Application.Dtos;
 using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Application.Interfaces.IServices
 {
     public interface IUserService
     {
-        public List<User> GetAllUsers();
-        public User GetUserById(Guid userId);
-        public User DeleteUser(User user);
-        public User UpdateUser(User user);
-        public User CreateUser(User user);
+        Task<IEnumerable<UserDto>> GetAllUsersAsync();
+        Task<UserDto?> GetUserByIdAsync(Guid userId);
+        Task<bool> DeleteUserAsync(Guid userId);
+        Task<UserDto?> UpdateUserAsync(UserDto user);
+        Task<User> CreateUserAsync(User user);
     }
 }

@@ -1,20 +1,23 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using SnowBuddies.Domain.Entities.Enums;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace SnowBuddies.Api.Models
 {
     public class UserModel
     {
+        [Required(ErrorMessage = "Field required")]
+        [MaxLength(30)]
+        [Display(Name = "Display Name")]
+        public string? DisplayName { get; set; }
 
-    public Guid UserId { get; set; }
-    public string? DisplayName { get; set; }
-    public string? Email { get; set; }
-    public string? FirstName { get; set; }
-    public string? LastName { get; set; }
-    public AccountStatus AccountStatus { get; set; }
-    
+        [Required(ErrorMessage = "Field required")]
+        [EmailAddress(ErrorMessage = "Invalid EmailAddress")]
+        [Display(Name = "Email")]
+        public string? Email { get; set; }
+
+        [Required, MinLength(6)]
+        public string Password { get; set; } = string.Empty;
+
+        [Required, Compare("Password")]
+        public string ConfirmPassword { get; set; } = string.Empty;
     }
 }

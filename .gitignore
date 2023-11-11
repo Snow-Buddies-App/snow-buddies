@@ -1,9 +1,9 @@
 # Ignore Visual Studio files
 .vscode/
+.vs/
 *.suo
 *.user
 *.sln.docstates
-.vs/
 
 # Ignore build output and logs
 bin/

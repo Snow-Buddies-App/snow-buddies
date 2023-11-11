@@ -1,4 +1,4 @@
-using SnowBuddies.Domain.Entities;
+﻿using SnowBuddies.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace SnowBuddies.Infrastructure.Data;
@@ -9,6 +9,7 @@ public class SnowBuddiesDbContext: DbContext
     {
     }
 
-    public DbSet<User> Users { get; set; }  
-    public DbSet<UserProfile> UserProfiles { get; set; }
+    public SnowBuddiesDbContext(){}
+    public virtual DbSet<User> Users { get; set; }  
+    public virtual DbSet<UserProfile> UserProfiles { get; set; }
 }
