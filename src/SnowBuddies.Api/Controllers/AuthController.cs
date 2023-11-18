@@ -6,77 +6,55 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using SnowBuddies.Api.Models;
+using SnowBuddies.Application.Dtos;
+using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Api.Controllers
 {
-    [Route("api / [controller]")]
+    [Route("api/[controller]")]
     [ApiController]
     public class AuthController : Controller
     {
-        private readonly IMapper _mapper;
-        private readonly UserManager<User> _userManager;
-        private readonly IConfigurationSection _jwtSettings;
-        public AuthController(IMapper mapper, UserManager<User> userManager, IConfiguration configuration)
+
+        private readonly IPasswordService _passwordService;
+        private readonly IUserService _userService;
+        private readonly IAuthenticationService _authenticationService;
+
+        public AuthController(IPasswordService passwordService, IUserService userService, IAuthenticationService authenticationService)
         {
-            _mapper = mapper;
-            _userManager = userManager;
-            _jwtSettings = configuration.GetSection("JwtSettings");
-        }
-        [HttpPost("Register")]
-        public async Task<ActionResult> Register(UserRegistrationModel userModel)
-        {
-            var user = _mapper.Map<User>(userModel);
-            var result = await _userManager.CreateAsync(user, userModel.Password);
-            if (!result.Succeeded)
-            {
-                return Ok(result.Errors);
-            }
-            return StatusCode(201);
-        }
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login(UserLoginModel userModel)
-        {
-            var user = await _userManager.FindByEmailAsync(userModel.Email);
-            if (user != null && await _userManager.CheckPasswordAsync(user, userModel.Password))
-            {
-                var signingCredentials = GetSigningCredentials();
-                var claims = GetClaims(user);
-                var tokenOptions = GenerateTokenOptions(signingCredentials, await claims);
-                var token = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
-                return Ok(token);
-            }
-            return Unauthorized("Invalid Authentication");
+            _passwordService = passwordService;
+            _userService = userService;
+            _authenticationService = authenticationService;
         }
 
-        private SigningCredentials GetSigningCredentials()
+        [HttpPost("Login")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Login(UserLoginModel loginUserRequest)
         {
-            var key = Encoding.UTF8.GetBytes(_jwtSettings.GetSection("securityKey").Value);
-            var secret = new SymmetricSecurityKey(key);
-            return new SigningCredentials(secret, SecurityAlgorithms.HmacSha256);
-        }
-        private JwtSecurityToken GenerateTokenOptions(SigningCredentials signingCredentials, List<Claim> claims)
-        {
-            var tokenOptions = new JwtSecurityToken(
-            issuer: _jwtSettings.GetSection("validIssuer").Value,
-            audience: _jwtSettings.GetSection("validAudience").Value,
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtSettings.GetSection("expiryInMinutes").Value)),
-            signingCredentials: signingCredentials);
-            return tokenOptions;
-        }
-        private async Task<List<Claim>> GetClaims(User user)
-        {
-            var claims = new List<Claim>
+            if (string.IsNullOrWhiteSpace(loginUserRequest.Email) || string.IsNullOrWhiteSpace(loginUserRequest.Password))
             {
-                new Claim(ClaimTypes.Name, user.Email)
-            };
-            var roles = await _userManager.GetRolesAsync(user);
-            foreach (var role in roles)
-            {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                return BadRequest("Invalid user");
             }
-            return claims;
+
+            var user = await _userService.GetUserByEmailAsync(loginUserRequest.Email);
+
+            if (user == null) 
+            {
+                return NotFound("User not found");
+            }
+             
+            var isPasswordVerified = _passwordService.VerifyPasswordHash(loginUserRequest.Password, user.PasswordHash, user.PasswordSalt);
+
+            if (!isPasswordVerified)
+            {
+                return Unauthorized("Incorrect password");
+            }
+            var token = _authenticationService.CreateToken(user);
+            return Ok(token);
         }
     }
 }

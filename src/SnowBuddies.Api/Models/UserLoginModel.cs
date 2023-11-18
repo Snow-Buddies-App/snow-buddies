@@ -4,11 +4,13 @@ namespace SnowBuddies.Api.Models
 {
     public class UserLoginModel
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        [Required(ErrorMessage = "Field required")]
+        [EmailAddress(ErrorMessage = "Invalid EmailAddress")]
+        [Display(Name = "Email")]
+        public string? Email { get; set; }
+
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public string? Password { get; set; }
     }
 }

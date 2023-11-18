@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using SnowBuddies.Application.Dtos;
@@ -46,7 +47,7 @@ namespace SnowBuddies.Application.Implementation.Services
         public async Task<bool> DeleteUserAsync(Guid userId)
         {
             var existingUser = await _userRepository.GetByIdAsync(userId);
-            if(existingUser != null) 
+            if (existingUser != null)
             {
                 _userRepository.Remove(existingUser);
                 await _userRepository.SaveChangesAsync();
@@ -58,8 +59,8 @@ namespace SnowBuddies.Application.Implementation.Services
         public async Task<UserDto?> UpdateUserAsync(UserDto user)
         {
             var existingUser = await _userRepository.GetByIdAsync(user.UserId);
-            
-            if(existingUser == null) 
+
+            if (existingUser == null)
             {
                 throw new ArgumentNullException(nameof(user));
             }
@@ -82,6 +83,18 @@ namespace SnowBuddies.Application.Implementation.Services
             await _userRepository.SaveChangesAsync();
 
             return user;
+        }
+
+        public async Task<User?> GetUserByEmailAsync(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+            {
+                throw new ArgumentNullException(nameof(email));
+            }
+
+            Expression<Func<User, bool>> userEmail = u => u.Email == email;
+            
+            return await _userRepository.FindAsync(userEmail);
         }
     }
 }

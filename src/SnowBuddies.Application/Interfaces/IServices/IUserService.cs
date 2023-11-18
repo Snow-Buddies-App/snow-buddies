@@ -10,5 +10,6 @@ namespace SnowBuddies.Application.Interfaces.IServices
         Task<bool> DeleteUserAsync(Guid userId);
         Task<UserDto?> UpdateUserAsync(UserDto user);
         Task<User> CreateUserAsync(User user);
+        Task<User?> GetUserByEmailAsync(string email);
     }
 }

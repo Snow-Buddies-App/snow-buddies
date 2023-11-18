@@ -13,6 +13,7 @@ namespace SnowBuddies.Application.Implementation.Services
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             ValidateNonEmptyPassword(password);
+
             using(var hmac = new HMACSHA512()) 
             {
                 passwordSalt = hmac.Key;
@@ -20,9 +21,15 @@ namespace SnowBuddies.Application.Implementation.Services
             }
         }
 
-        public bool VerifyPassword(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        public bool VerifyPasswordHash(string password, byte[] storedPasswordHash, byte[] storedPasswordSalt)
         {
-            throw new NotImplementedException();
+            ValidateNonEmptyPassword(password);
+
+            using (var hmac = new HMACSHA512(storedPasswordSalt))
+            {
+                var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(password));
+                return computedHash.SequenceEqual(storedPasswordHash);
+            }
         }
 
         private string ValidateNonEmptyPassword(string password)
