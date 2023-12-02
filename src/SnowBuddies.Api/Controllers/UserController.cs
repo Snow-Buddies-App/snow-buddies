@@ -19,7 +19,6 @@ namespace SnowBuddies.Api.Controllers
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _passwordService = passwordService;
-
         }
 
         [HttpGet]
@@ -64,6 +63,7 @@ namespace SnowBuddies.Api.Controllers
                 return BadRequest("Invalid user data.");
             }
             _passwordService.CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            
             var newUser = new User()
             {
                 DisplayName = userModel.DisplayName,
@@ -73,12 +73,9 @@ namespace SnowBuddies.Api.Controllers
             };
 
             await _userService.CreateUserAsync(newUser);
-            var responseUserModel = new UserDto()
-            {
-                UserId = newUser.UserId,
-                DisplayName = newUser.DisplayName,
-                Email = newUser.Email,
-            };
+
+            var responseUserModel = _mapper.Map<UserDto>(newUser);
+            
             return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, responseUserModel);
         }
 

@@ -18,9 +18,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters" Version="7.0.12" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SnowBuddies.Application\SnowBuddies.Application.csproj" />
     <ProjectReference Include="..\SnowBuddies.Infrastructure\SnowBuddies.Infrastructure.csproj" />
     <ProjectReference Include="..\SnowBuddies.Domain\SnowBuddies.Domain.csproj" />
   </ItemGroup>
