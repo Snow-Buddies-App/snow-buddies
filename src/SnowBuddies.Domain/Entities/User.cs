@@ -23,6 +23,6 @@ public class User
 
     [Required]
     public byte[] PasswordSalt { get; set; } = new byte[32];
-    
+
     public virtual UserProfile? UserProfile { get; set; } = null!;
 }

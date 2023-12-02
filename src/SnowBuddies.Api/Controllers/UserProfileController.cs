@@ -79,5 +79,5 @@ namespace SnowBuddies.Api.Controllers
 
 
     }
-      
+
 }

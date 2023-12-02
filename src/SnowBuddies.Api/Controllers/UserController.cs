@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using SnowBuddies.Api.Models;
+using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 
@@ -66,6 +63,7 @@ namespace SnowBuddies.Api.Controllers
                 return BadRequest("Invalid user data.");
             }
             _passwordService.CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
+            
             var newUser = new User()
             {
                 DisplayName = userModel.DisplayName,
@@ -76,7 +74,9 @@ namespace SnowBuddies.Api.Controllers
 
             await _userService.CreateUserAsync(newUser);
 
-            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, newUser);
+            var responseUserModel = _mapper.Map<UserDto>(newUser);
+            
+            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, responseUserModel);
         }
 
         [HttpPut("{userId}")]
@@ -107,7 +107,7 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
         [ProducesResponseType(500)]
-        public async Task <IActionResult> DeleteUser(Guid userId)
+        public async Task<IActionResult> DeleteUser(Guid userId)
         {
             var isDeleted = await _userService.DeleteUserAsync(userId);
             if (!isDeleted)
