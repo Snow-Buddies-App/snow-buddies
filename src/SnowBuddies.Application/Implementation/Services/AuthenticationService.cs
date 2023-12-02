@@ -19,5 +19,3 @@ namespace SnowBuddies.Application.Implementation.Services
 
     }
 }
-
-

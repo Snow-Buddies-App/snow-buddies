@@ -14,6 +14,7 @@ namespace SnowBuddies.Application.AutoMapperConfiguration
         public ApplicationProfile()
         {
             CreateMap<User, UserDto>().ReverseMap();
+            CreateMap<UserProfile, UserProfileDto>().ReverseMap();
         }
     }
 }
