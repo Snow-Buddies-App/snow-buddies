@@ -20,7 +20,7 @@ namespace SnowBuddies.Domain.Entities
         public string? LastName { get; set; }
 
         [Required]
-        public DateTime DateOfBirth { get; set; }
+        public DateOnly DateOfBirth { get; set; }
 
         public AccountStatus AccountStatus { get; set; }
         public virtual User? User { get; set; }
