@@ -27,12 +27,13 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetAllUserProfilesAsync()
         {
-            var users = await _userProfileService.GetAllUserProfilesAsync();
-            if (users == null || !users.Any())
+            var userProfiles = await _userProfileService.GetAllUserProfilesAsync();
+            
+            if (userProfiles == null || !userProfiles.Any())
             {
                 return NotFound();
             }
-            return Ok(users);
+            return Ok(userProfiles);
         }
         [HttpGet("{userProfileId}")]
         [ProducesResponseType(200)]
@@ -42,12 +43,12 @@ namespace SnowBuddies.Api.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetUserProfileById(Guid userProfileId)
         {
-            var existingUser = await _userProfileService.GetUserProfileByIdAsync(userProfileId);
-            if (existingUser == null)
+            var existingUserProfile = await _userProfileService.GetUserProfileByIdAsync(userProfileId);
+            if (existingUserProfile == null)
             {
                 return NotFound("User Profile doesn't exist");
             }
-            return Ok(existingUser);
+            return Ok(existingUserProfile);
         }
 
 
