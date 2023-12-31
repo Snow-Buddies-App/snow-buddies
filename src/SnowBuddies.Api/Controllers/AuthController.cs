@@ -16,16 +16,18 @@ namespace SnowBuddies.Api.Controllers
     [ApiController]
     public class AuthController : Controller
     {
-
         private readonly IPasswordService _passwordService;
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
-
-        public AuthController(IPasswordService passwordService, IUserService userService, IAuthenticationService authenticationService)
+        private readonly IExternalLoginService _externalLoginService;
+        
+        public AuthController(IExternalLoginService externalLoginService, IPasswordService passwordService, IUserService userService, IAuthenticationService authenticationService)
         {
+            _authenticationService = authenticationService;
             _passwordService = passwordService;
             _userService = userService;
             _authenticationService = authenticationService;
+            _externalLoginService = externalLoginService;
         }
 
         [HttpPost("Login")]
@@ -55,6 +57,21 @@ namespace SnowBuddies.Api.Controllers
             }
             var token = _authenticationService.CreateToken(user);
             return Ok(token);
+        }
+
+        [HttpPost("Google-sign-in")]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> LoginWithGoogle(string accessToken) 
+        {
+            if (string.IsNullOrWhiteSpace(accessToken)) 
+            {
+                return BadRequest();
+            }
+            await _externalLoginService.LoginWithGoogleAsync(accessToken);
+            return Ok();
         }
     }
 }

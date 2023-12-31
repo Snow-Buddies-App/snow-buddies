@@ -33,6 +33,9 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserProfileService, UserProfileService>();
 builder.Services.AddScoped<IPasswordService, PasswordService>();
 builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+builder.Services.AddScoped<IExternalLoginService, ExternalLoginService>();
+builder.Services.AddScoped<IGoogleAuthService, GoogleAuthService>();
+
 builder.Services.AddDbContext<SnowBuddiesDbContext>(options => options.UseNpgsql(fullConnectionString));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -58,7 +61,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuer = false,
             ValidateAudience = false
         };
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration.GetSection("Authentication:Google:ClientId").Value!;
+        googleOptions.ClientSecret = builder.Configuration.GetSection("Authentication:Google:ClientSecret").Value!; 
     });
+builder.Services.AddHttpClient();
 
 var app = builder.Build();
 
