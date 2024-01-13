@@ -14,11 +14,13 @@ namespace SnowBuddies.Api.Controllers
     {
         private readonly IUserProfileService _userProfileService;
         private readonly IMapper _mapper;
+        private readonly ILogger<UserProfileController> _logger;
 
-        public UserProfileController(IUserProfileService userProfileService, IMapper mapper)
+        public UserProfileController(IUserProfileService userProfileService, IMapper mapper, ILogger<UserProfileController> logger)
         {
             _userProfileService = userProfileService;
             _mapper = mapper;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
         [HttpGet]
         [ProducesResponseType(200)]

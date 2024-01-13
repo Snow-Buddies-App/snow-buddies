@@ -14,11 +14,13 @@ namespace SnowBuddies.Api.Controllers
         private readonly IUserService _userService;
         private readonly IPasswordService _passwordService;
         private readonly IMapper _mapper;
-        public UserController(IUserService userService, IMapper mapper, IPasswordService passwordService)
+        private readonly ILogger<UserController> _logger;
+        public UserController(IUserService userService, IMapper mapper, IPasswordService passwordService, ILogger<UserController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _passwordService = passwordService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]

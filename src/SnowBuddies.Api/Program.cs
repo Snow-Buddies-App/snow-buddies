@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
+using Serilog;
 using SnowBuddies.Application.AutoMapperConfiguration;
 using SnowBuddies.Application.Implementation.Services;
 using SnowBuddies.Application.Interfaces.IRepositories;
@@ -15,6 +16,11 @@ using Swashbuckle.AspNetCore.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
+//Add logger
+Log.Logger = new LoggerConfiguration()
+   .ReadFrom.Configuration(builder.Configuration)
+   .CreateLogger();
+builder.Host.UseSerilog();
 
 var connectionStringFromConfig = builder.Configuration.GetConnectionString("SBConnectionString");
 string? dbPassword = builder.Configuration["Password"];
