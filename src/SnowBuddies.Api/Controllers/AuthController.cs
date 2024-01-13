@@ -20,14 +20,16 @@ namespace SnowBuddies.Api.Controllers
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
         private readonly IExternalLoginService _externalLoginService;
+        private readonly ILogger<AuthController> _logger;
         
-        public AuthController(IExternalLoginService externalLoginService, IPasswordService passwordService, IUserService userService, IAuthenticationService authenticationService)
+        public AuthController(IExternalLoginService externalLoginService, IPasswordService passwordService, IUserService userService, IAuthenticationService authenticationService, ILogger<AuthController> logger)
         {
             _authenticationService = authenticationService;
             _passwordService = passwordService;
             _userService = userService;
             _authenticationService = authenticationService;
             _externalLoginService = externalLoginService;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpPost("Login")]
