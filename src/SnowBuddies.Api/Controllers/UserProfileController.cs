@@ -4,6 +4,8 @@ using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
 using SnowBuddies.Api.Models;
 using SnowBuddies.Application.Dtos;
+using Serilog;
+using SnowBuddies.Api.ReadModels;
 
 
 namespace SnowBuddies.Api.Controllers
@@ -33,8 +35,10 @@ namespace SnowBuddies.Api.Controllers
             
             if (userProfiles == null || !userProfiles.Any())
             {
+                Log.Information("UserProfiles not found.");
                 return NotFound();
             }
+
             return Ok(userProfiles);
         }
         [HttpGet("{userProfileId}")]
@@ -48,7 +52,8 @@ namespace SnowBuddies.Api.Controllers
             var existingUserProfile = await _userProfileService.GetUserProfileByIdAsync(userProfileId);
             if (existingUserProfile == null)
             {
-                return NotFound("User Profile doesn't exist");
+                Log.Information("User profile not found.");
+                return NotFound("User Profile doesn't exist.");
             }
             return Ok(existingUserProfile);
         }
@@ -56,6 +61,7 @@ namespace SnowBuddies.Api.Controllers
 
 
         [HttpPut("edit-profile/{userProfileId}")]
+        [ProducesResponseType(200)]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(400)]
@@ -65,6 +71,7 @@ namespace SnowBuddies.Api.Controllers
             var existingUser = await _userProfileService.GetUserProfileByIdAsync(userProfileId);
             if (existingUser == null)
             {
+                Log.Information("User profile not to be updated.");
                 return NotFound("User Profile not found");
             }
             _mapper.Map(userProfileModel, existingUser);
@@ -73,13 +80,12 @@ namespace SnowBuddies.Api.Controllers
 
             if (updatedUserProfile == null)
             {
+                Log.Information("User profile not updated");
                 return NotFound();
             }
 
             return Ok(updatedUserProfile);
         }
-
-
 
     }
 

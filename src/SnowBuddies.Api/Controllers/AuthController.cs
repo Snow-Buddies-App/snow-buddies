@@ -5,6 +5,7 @@ using AutoMapper;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using SnowBuddies.Api.Models;
 using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
@@ -41,6 +42,7 @@ namespace SnowBuddies.Api.Controllers
         {
             if (string.IsNullOrWhiteSpace(loginUserRequest.Email) || string.IsNullOrWhiteSpace(loginUserRequest.Password))
             {
+                Log.Warning("Invalid user login request. Email or password is empty.");
                 return BadRequest("Invalid user");
             }
 
@@ -48,6 +50,7 @@ namespace SnowBuddies.Api.Controllers
 
             if (user == null) 
             {
+                Log.Information("User not found for login. Email: {UserEmail}", loginUserRequest.Email);
                 return NotFound("User not found");
             }
              
@@ -55,6 +58,7 @@ namespace SnowBuddies.Api.Controllers
 
             if (!isPasswordVerified)
             {
+                Log.Information("Incorrect password for user login. Email: {UserEmail}", loginUserRequest.Email);
                 return Unauthorized("Incorrect password");
             }
             var token = _authenticationService.CreateToken(user);
@@ -70,6 +74,7 @@ namespace SnowBuddies.Api.Controllers
         {
             if (string.IsNullOrWhiteSpace(accessToken)) 
             {
+                Log.Warning("Invalid Google sign-in request. Access token is empty.");
                 return BadRequest();
             }
             await _externalLoginService.LoginWithGoogleAsync(accessToken);

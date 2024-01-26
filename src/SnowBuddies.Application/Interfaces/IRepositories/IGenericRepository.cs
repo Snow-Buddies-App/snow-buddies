@@ -20,5 +20,6 @@ namespace SnowBuddies.Application.Interfaces.IRepositories
         Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default);
         Task<IEnumerable<TEntity>> GetAllAsync(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken = default);
         Task SaveChangesAsync();
+        Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
     }
 }
