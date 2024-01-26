@@ -28,16 +28,6 @@ namespace SnowBuddies.Application.Implementation.Services
             return _mapper.Map<IEnumerable<UserDto>>(users);
         }
 
-        private async Task CheckIfUserExist(string email, string displayName)
-        {
-            var users = await _userRepository.GetAllAsync();
-
-            if (users.Any(u => u.Email == email || u.DisplayName == displayName))
-            {
-                throw new ArgumentException("User already exist");
-            }
-        }
-
         public async Task<UserDto?> GetUserByIdAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
@@ -79,10 +69,21 @@ namespace SnowBuddies.Application.Implementation.Services
                 throw new ArgumentNullException("Email and DisplayName are required fields");
             }
             await CheckIfUserExist(user.Email, user.DisplayName);
+            var userProfile = new UserProfile();
+            user.UserProfile = userProfile;
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
             return user;
+        }
+
+        private async Task CheckIfUserExist(string email, string displayName)
+        {
+
+            if(await _userRepository.AnyAsync(u => u.Email == email || u.DisplayName == displayName)) 
+            {
+                throw new ArgumentException("User already exist");
+            }
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)

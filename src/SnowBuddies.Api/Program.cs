@@ -5,6 +5,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using Serilog;
+using SnowBuddies.Api.Middleware;
 using SnowBuddies.Application.AutoMapperConfiguration;
 using SnowBuddies.Application.Implementation.Services;
 using SnowBuddies.Application.Interfaces.IRepositories;
@@ -78,6 +79,8 @@ builder.Services.AddHttpClient();
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
+app.UseMiddleware<ErrorHandlingMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -130,7 +131,7 @@ namespace UnitTests.Services
                 Email = "vity@gmail.com"
             };
 
-            _mockUserRepository.Setup(repo => repo.GetAllAsync(cancellationToken)).ReturnsAsync(new List<User> { existingUser });
+            _mockUserRepository.Setup(repo => repo.AnyAsync(It.IsAny<Expression<Func<User, bool>>>())).ReturnsAsync(true);
 
             await Assert.ThrowsAsync<ArgumentException>(() => _userService.CreateUserAsync(existingUser));
         }

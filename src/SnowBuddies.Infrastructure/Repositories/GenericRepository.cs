@@ -71,6 +71,11 @@ namespace SnowBuddies.Infrastructure.Repositories
         {
             return _context.SaveChangesAsync();
         }
+
+        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
+        {
+            return await _context.Set<TEntity>().AnyAsync(predicate);
+        }
     }
 
 }
