@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Application.Interfaces.IServices
 {
     public interface IExternalLoginService
     {
-        Task LoginWithGoogleAsync(string accessToken);
+        /// <summary>
+        /// Validates a Google ID token and returns the matching user, creating one on first sign-in.
+        /// </summary>
+        Task<User> LoginWithGoogleAsync(string idToken);
     }
 }

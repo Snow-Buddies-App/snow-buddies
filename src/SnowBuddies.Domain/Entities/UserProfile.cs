@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using SnowBuddies.Domain.Entities.Enums;
 
 namespace SnowBuddies.Domain.Entities
@@ -19,8 +19,7 @@ namespace SnowBuddies.Domain.Entities
         [MaxLength(30)]
         public string? LastName { get; set; }
 
-        [Required]
-        public DateOnly DateOfBirth { get; set; }
+        public DateOnly? DateOfBirth { get; set; }
 
         public AccountStatus AccountStatus { get; set; }
         public virtual User? User { get; set; }

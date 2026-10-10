@@ -1,41 +1,48 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using Google.Apis.Auth;
 using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Application.Settings;
+using SnowBuddies.Domain.Exceptions;
 
 namespace SnowBuddies.Application.Implementation.Services
 {
     public class GoogleAuthService : IGoogleAuthService
     {
-        private const string TokenValidationUrl = "https://www.googleapis.com/oauth2/v2/tokeninfo?access_token={0}";
-        private const string UserInfoUrl = "https://www.googleapis.com/userinfo/v2/me?fields=family_name,email,name,given_name,family_name,picture&access_token={0}";
-        private readonly IHttpClientFactory _httpClientFactory;
+        private readonly GoogleAuthSettings _settings;
 
-        public GoogleAuthService(IHttpClientFactory httpClientFactory)
+        public GoogleAuthService(GoogleAuthSettings settings)
         {
-            _httpClientFactory = httpClientFactory;
+            _settings = settings;
         }
 
-        public async Task<GoogleTokenValidationData> ValidateAccessTokenAsync(string accessToken)
+        public async Task<GoogleUserInfo> ValidateIdTokenAsync(string idToken)
         {
-            var formattedUrl = string.Format(TokenValidationUrl, accessToken);
-            var result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
-            result.EnsureSuccessStatusCode();
-            var responseAsString = await result.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<GoogleTokenValidationData>(responseAsString)!;
-        }
+            if (_settings.ClientIds.Count == 0)
+            {
+                throw new InvalidOperationException("Google sign-in is not configured. Set Authentication:Google:ClientIds.");
+            }
 
-        public async Task<GoogleUserInfoResponse> GetUserInfoAsync(string accessToken)
-        {
-            var formattedUrl = string.Format(UserInfoUrl, accessToken);
-            var result = await _httpClientFactory.CreateClient().GetAsync(formattedUrl);
-            result.EnsureSuccessStatusCode();
-            var responseAsString = await result.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<GoogleUserInfoResponse>(responseAsString)!;
+            GoogleJsonWebSignature.Payload payload;
+            try
+            {
+                payload = await GoogleJsonWebSignature.ValidateAsync(idToken, new GoogleJsonWebSignature.ValidationSettings
+                {
+                    Audience = _settings.ClientIds
+                });
+            }
+            catch (InvalidJwtException)
+            {
+                throw new UnauthorizedException("Invalid Google token");
+            }
+
+            return new GoogleUserInfo
+            {
+                Email = payload.Email,
+                EmailVerified = payload.EmailVerified,
+                GivenName = payload.GivenName,
+                FamilyName = payload.FamilyName,
+                Picture = payload.Picture
+            };
         }
     }
 }

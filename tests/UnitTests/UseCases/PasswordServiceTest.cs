@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -74,6 +74,37 @@ namespace UnitTests.UseCases
             var isPasswordValid = _passwordService.VerifyPasswordHash(passwordToBeVerified, storedPasswordHash, storedPasswordSalt);
             
             Assert.True(isPasswordValid);
+        }
+            [Fact]
+        public void VerifyPassword_LegacyHmacHash_ShouldStillVerify()
+        {
+            // Accounts created before the PBKDF2 switch stored HMAC-SHA512(key = 128 byte salt).
+            byte[] legacySalt;
+            byte[] legacyHash;
+            using (var hmac = new HMACSHA512())
+            {
+                legacySalt = hmac.Key;
+                legacyHash = hmac.ComputeHash(Encoding.UTF8.GetBytes("Password123"));
+            }
+
+            Assert.True(_passwordService.VerifyPasswordHash("Password123", legacyHash, legacySalt));
+            Assert.False(_passwordService.VerifyPasswordHash("WrongPassword", legacyHash, legacySalt));
+        }
+
+        [Fact]
+        public void VerifyPassword_NoStoredPassword_ShouldReturnFalse()
+        {
+            Assert.False(_passwordService.VerifyPasswordHash("Password123", null, null));
+        }
+
+        [Fact]
+        public void CreatePasswordHash_SamePassword_ShouldUseDifferentSalts()
+        {
+            _passwordService.CreatePasswordHash("Password123", out var firstHash, out var firstSalt);
+            _passwordService.CreatePasswordHash("Password123", out var secondHash, out var secondSalt);
+
+            Assert.NotEqual(firstSalt, secondSalt);
+            Assert.NotEqual(firstHash, secondHash);
         }
     }
 }

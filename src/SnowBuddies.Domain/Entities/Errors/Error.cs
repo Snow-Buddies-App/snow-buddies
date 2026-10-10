@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Nodes;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace SnowBuddies.Domain.Entities.Errors
 {
@@ -14,7 +8,7 @@ namespace SnowBuddies.Domain.Entities.Errors
         public string? Message { get; set; }
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(this, Formatting.Indented);
+            return JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
         }
     }
 }

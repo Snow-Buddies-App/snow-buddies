@@ -17,7 +17,7 @@ namespace SnowBuddies.Infrastructure.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("ProductVersion", "10.0.12")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -39,14 +39,18 @@ namespace SnowBuddies.Infrastructure.Migrations
                         .HasColumnType("character varying(100)");
 
                     b.Property<byte[]>("PasswordHash")
-                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.Property<byte[]>("PasswordSalt")
-                        .IsRequired()
                         .HasColumnType("bytea");
 
                     b.HasKey("UserId");
+
+                    b.HasIndex("DisplayName")
+                        .IsUnique();
+
+                    b.HasIndex("Email")
+                        .IsUnique();
 
                     b.ToTable("Users");
                 });
@@ -63,7 +67,7 @@ namespace SnowBuddies.Infrastructure.Migrations
                     b.Property<string>("Bio")
                         .HasColumnType("text");
 
-                    b.Property<DateOnly>("DateOfBirth")
+                    b.Property<DateOnly?>("DateOfBirth")
                         .HasColumnType("date");
 
                     b.Property<string>("FirstName")
