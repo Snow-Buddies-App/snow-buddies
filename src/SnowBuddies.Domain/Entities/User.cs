@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SnowBuddies.Domain.Entities;
 
@@ -18,11 +18,10 @@ public class User
     [Display(Name = "Email")]
     public string? Email { get; set; }
 
-    [Required]
-    public byte[] PasswordHash { get; set; } = new byte[32];
+    // Null for accounts created through an external provider (e.g. Google) that have no password.
+    public byte[]? PasswordHash { get; set; }
 
-    [Required]
-    public byte[] PasswordSalt { get; set; } = new byte[32];
+    public byte[]? PasswordSalt { get; set; }
 
     public virtual UserProfile? UserProfile { get; set; }
 }

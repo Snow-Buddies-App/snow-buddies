@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace SnowBuddies.Api.Models
 {
@@ -10,6 +10,7 @@ namespace SnowBuddies.Api.Models
         public string? DisplayName { get; set; }
 
         [Required(ErrorMessage = "Field required")]
+        [MaxLength(100)]
         [EmailAddress(ErrorMessage = "Invalid EmailAddress")]
         [Display(Name = "Email")]
         public string? Email { get; set; }

@@ -1,37 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Threading.Tasks;
-using AutoMapper;
 using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Application.Mapping;
 using SnowBuddies.Domain.Entities;
+using SnowBuddies.Domain.Exceptions;
 
 namespace SnowBuddies.Application.Implementation.Services
 {
     public class UserService : IUserService
     {
         private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
 
-        public UserService(IUserRepository userRepository, IMapper mapper)
+        public UserService(IUserRepository userRepository)
         {
             _userRepository = userRepository;
-            _mapper = mapper;
         }
 
         public async Task<IEnumerable<UserDto>> GetAllUsersAsync()
         {
             var users = await _userRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<UserDto>>(users);
+            return users.Select(u => u.ToDto()).ToList();
         }
 
         public async Task<UserDto?> GetUserByIdAsync(Guid userId)
         {
             var user = await _userRepository.GetByIdAsync(userId);
-            return _mapper.Map<UserDto>(user);
+            return user?.ToDto();
         }
 
         public async Task<bool> DeleteUserAsync(Guid userId)
@@ -46,31 +41,41 @@ namespace SnowBuddies.Application.Implementation.Services
             return false;
         }
 
-        public async Task<UserDto?> UpdateUserAsync(UserDto user)
+        public async Task<UserDto> UpdateUserAsync(UserDto user)
         {
-            var existingUser = await _userRepository.GetByIdAsync(user.UserId);
+            var existingUser = await _userRepository.GetByIdAsync(user.UserId)
+                ?? throw new NotFoundException("User not found");
 
-            if (existingUser == null)
+            if (string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.DisplayName))
             {
-                throw new ArgumentNullException(nameof(user));
+                throw new BadRequestException("Email and DisplayName are required fields");
             }
-            existingUser.Email = user.Email;
+
+            var email = NormalizeEmail(user.Email);
+            if (await _userRepository.AnyAsync(u => u.UserId != user.UserId && (u.Email == email || u.DisplayName == user.DisplayName)))
+            {
+                throw new ConflictException("Email or display name is already taken");
+            }
+
+            existingUser.Email = email;
             existingUser.DisplayName = user.DisplayName;
             _userRepository.Update(existingUser);
             await _userRepository.SaveChangesAsync();
 
-            return _mapper.Map<UserDto>(existingUser);
+            return existingUser.ToDto();
         }
 
         public async Task<User> CreateUserAsync(User user)
         {
             if (string.IsNullOrWhiteSpace(user?.Email) || string.IsNullOrWhiteSpace(user?.DisplayName))
             {
-                throw new ArgumentNullException("Email and DisplayName are required fields");
+                throw new BadRequestException("Email and DisplayName are required fields");
             }
+            user.Email = NormalizeEmail(user.Email);
             await CheckIfUserExist(user.Email, user.DisplayName);
-            var userProfile = new UserProfile();
-            user.UserProfile = userProfile;
+
+            // Keep a profile supplied by the caller (e.g. names from Google); otherwise start with an empty one.
+            user.UserProfile ??= new UserProfile();
             await _userRepository.AddAsync(user);
             await _userRepository.SaveChangesAsync();
 
@@ -79,10 +84,9 @@ namespace SnowBuddies.Application.Implementation.Services
 
         private async Task CheckIfUserExist(string email, string displayName)
         {
-
-            if(await _userRepository.AnyAsync(u => u.Email == email || u.DisplayName == displayName)) 
+            if (await _userRepository.AnyAsync(u => u.Email == email || u.DisplayName == displayName))
             {
-                throw new ArgumentException("User already exist");
+                throw new ConflictException("User already exists");
             }
         }
 
@@ -93,9 +97,18 @@ namespace SnowBuddies.Application.Implementation.Services
                 throw new ArgumentNullException(nameof(email));
             }
 
-            Expression<Func<User, bool>> userEmail = u => u.Email == email;
-            
+            var normalizedEmail = NormalizeEmail(email);
+            Expression<Func<User, bool>> userEmail = u => u.Email == normalizedEmail;
+
             return await _userRepository.FindAsync(userEmail);
+        }
+
+        // Emails are stored trimmed and lower-cased so lookups are case-insensitive.
+        private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+
+        public Task<bool> DisplayNameExistsAsync(string displayName)
+        {
+            return _userRepository.AnyAsync(u => u.DisplayName == displayName);
         }
     }
 }

@@ -1,45 +1,42 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
 using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IRepositories;
 using SnowBuddies.Application.Interfaces.IServices;
-using SnowBuddies.Domain.Entities;
+using SnowBuddies.Application.Mapping;
+using SnowBuddies.Domain.Exceptions;
 
 namespace SnowBuddies.Application.Implementation.Services
 {
     public class UserProfileService : IUserProfileService
     {
         private readonly IUserProfileRepository _userProfileRepository;
-        private readonly IMapper _mapper;
-        public UserProfileService(IUserProfileRepository userProfileRepository, IMapper mapper)
+
+        public UserProfileService(IUserProfileRepository userProfileRepository)
         {
             _userProfileRepository = userProfileRepository;
-            _mapper = mapper;
         }
 
         public async Task<IEnumerable<UserProfileDto>> GetAllUserProfilesAsync()
         {
             var userProfiles = await _userProfileRepository.GetAllAsync();
-            return _mapper.Map<IEnumerable<UserProfileDto>>(userProfiles);
+            return userProfiles.Select(p => p.ToDto()).ToList();
         }
 
-        public async Task<UserProfileDto?> GetUserProfileByIdAsync(Guid userId)
+        public async Task<UserProfileDto?> GetUserProfileByIdAsync(Guid userProfileId)
         {
-            var user = await _userProfileRepository.GetByIdAsync(userId);
-            return _mapper.Map<UserProfileDto>(user);
+            var userProfile = await _userProfileRepository.GetByIdAsync(userProfileId);
+            return userProfile?.ToDto();
         }
 
-        public async Task<UserProfileDto?> UpdateUserProfileAsync(UserProfileDto userProfile)
+        public async Task<UserProfileDto?> GetUserProfileByUserIdAsync(Guid userId)
         {
-            var existingUserProfile = await _userProfileRepository.GetByIdAsync(userProfile.UserProfileId);
+            var userProfile = await _userProfileRepository.FindAsync(p => p.UserId == userId);
+            return userProfile?.ToDto();
+        }
 
-            if (existingUserProfile == null)
-            {
-                throw new ArgumentNullException(nameof(userProfile));
-            }
+        public async Task<UserProfileDto> UpdateUserProfileAsync(UserProfileDto userProfile)
+        {
+            var existingUserProfile = await _userProfileRepository.GetByIdAsync(userProfile.UserProfileId)
+                ?? throw new NotFoundException("User Profile not found");
 
             existingUserProfile.FirstName = userProfile.FirstName;
             existingUserProfile.LastName = userProfile.LastName;
@@ -49,7 +46,7 @@ namespace SnowBuddies.Application.Implementation.Services
             _userProfileRepository.Update(existingUserProfile);
             await _userProfileRepository.SaveChangesAsync();
 
-            return _mapper.Map<UserProfileDto>(existingUserProfile);
+            return existingUserProfile.ToDto();
         }
     }
 }

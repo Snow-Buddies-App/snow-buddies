@@ -1,77 +1,86 @@
-﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Serilog;
+using Microsoft.AspNetCore.RateLimiting;
+using SnowBuddies.Api.Extensions;
 using SnowBuddies.Api.Models;
 using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Application.Mapping;
 using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Api.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("api/[controller]")]
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
         private readonly IPasswordService _passwordService;
-        private readonly IMapper _mapper;
         private readonly ILogger<UserController> _logger;
-        public UserController(IUserService userService, IMapper mapper, IPasswordService passwordService, ILogger<UserController> logger)
+
+        public UserController(IUserService userService, IPasswordService passwordService, ILogger<UserController> logger)
         {
             _userService = userService ?? throw new ArgumentNullException(nameof(userService));
-            _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _passwordService = passwordService;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         [HttpGet]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(typeof(IEnumerable<UserDto>), 200)]
+        [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetAllUsers()
         {
             var users = await _userService.GetAllUsersAsync();
-            if (users == null || !users.Any())
-            {
-                Log.Information("No users found.");
-                return NotFound();
-            }
-            Log.Information("Returning {UserCount} users.", users?.Count() ?? 0);
+            _logger.LogInformation("Returning {UserCount} users.", users.Count());
 
             return Ok(users);
         }
 
-        [HttpGet("{userId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(204)]
+        [HttpGet("me")]
+        [ProducesResponseType(typeof(UserDto), 200)]
+        [ProducesResponseType(401)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetCurrentUser()
+        {
+            var userId = User.GetUserId();
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
+
+            return await GetUserById(userId.Value);
+        }
+
+        [HttpGet("{userId:guid}")]
+        [ProducesResponseType(typeof(UserDto), 200)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(404)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetUserById(Guid userId)
         {
             var existingUser = await _userService.GetUserByIdAsync(userId);
             if (existingUser == null)
             {
-                Log.Information("No user found.");
+                _logger.LogInformation("No user found. User ID: {UserId}", userId);
                 return NotFound("User doesn't exist");
             }
-            Log.Information("Returning user by ID: {UserId}", existingUser.UserId);
 
             return Ok(existingUser);
         }
 
         [HttpPost("Register")]
-        [ProducesResponseType(typeof(UserModel), 201)]
+        [AllowAnonymous]
+        [EnableRateLimiting(RateLimitPolicies.Auth)]
+        [ProducesResponseType(typeof(UserDto), 201)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(409)]
+        [ProducesResponseType(429)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> CreateUser(UserModel userModel)
         {
-            if (userModel == null)
-            {
-                Log.Warning("Invalid user data provided.");
-                return BadRequest("Invalid user data.");
-            }
             _passwordService.CreatePasswordHash(userModel.Password, out byte[] passwordHash, out byte[] passwordSalt);
 
             var newUser = new User()
@@ -82,54 +91,57 @@ namespace SnowBuddies.Api.Controllers
                 PasswordHash = passwordHash,
             };
 
-            Log.Information("User created successfully. User ID: {Email}", newUser.Email);
             await _userService.CreateUserAsync(newUser);
+            _logger.LogInformation("User created successfully. User ID: {UserId}", newUser.UserId);
 
-            var responseUserModel = _mapper.Map<UserDto>(newUser);
-
-            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, responseUserModel);
+            return CreatedAtAction(nameof(GetUserById), new { userId = newUser.UserId }, newUser.ToDto());
         }
 
-        [HttpPut("{userId}")]
-        [ProducesResponseType(200)]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
+        [HttpPut("{userId:guid}")]
+        [ProducesResponseType(typeof(UserDto), 200)]
         [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UserModel userModel)
+        public async Task<IActionResult> UpdateUser(Guid userId, [FromBody] UpdateUserModel userModel)
         {
-            var existingUser = await _userService.GetUserByIdAsync(userId);
-            if (existingUser == null)
+            if (User.GetUserId() != userId)
             {
-                Log.Information("User not found to be updated.");
-                return NotFound("User not found");
+                return Forbid();
             }
-            _mapper.Map(userModel, existingUser);
 
-            var updatedUser = await _userService.UpdateUserAsync(existingUser);
-            if (updatedUser == null)
+            var updatedUser = await _userService.UpdateUserAsync(new UserDto
             {
-                Log.Information("User not updated.");
-                return NotFound();
-            }
+                UserId = userId,
+                DisplayName = userModel.DisplayName,
+                Email = userModel.Email
+            });
 
             return Ok(updatedUser);
         }
 
-        [HttpDelete("{userId}")]
+        [HttpDelete("{userId:guid}")]
         [ProducesResponseType(204)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(403)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(400)]
         [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteUser(Guid userId)
         {
+            if (User.GetUserId() != userId)
+            {
+                return Forbid();
+            }
+
             var isDeleted = await _userService.DeleteUserAsync(userId);
             if (!isDeleted)
             {
-                Log.Information("User not found to be deleted.");
+                _logger.LogInformation("User not found to be deleted. User ID: {UserId}", userId);
                 return NotFound("User not found");
             }
-            Log.Information("User deleted successfully. User ID: {UserId}", userId);
+            _logger.LogInformation("User deleted successfully. User ID: {UserId}", userId);
 
             return NoContent();
         }

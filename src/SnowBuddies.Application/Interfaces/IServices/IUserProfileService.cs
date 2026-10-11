@@ -1,12 +1,12 @@
-using SnowBuddies.Domain.Entities;
-using SnowBuddies.Application.Dtos; 
+using SnowBuddies.Application.Dtos;
 
 namespace SnowBuddies.Application.Interfaces.IServices
 {
     public interface IUserProfileService
     {
-        public Task<IEnumerable<UserProfileDto>> GetAllUserProfilesAsync();
-        public Task<UserProfileDto?> GetUserProfileByIdAsync(Guid userProfileId);
-        Task<UserProfileDto?> UpdateUserProfileAsync(UserProfileDto userProfile);
+        Task<IEnumerable<UserProfileDto>> GetAllUserProfilesAsync();
+        Task<UserProfileDto?> GetUserProfileByIdAsync(Guid userProfileId);
+        Task<UserProfileDto?> GetUserProfileByUserIdAsync(Guid userId);
+        Task<UserProfileDto> UpdateUserProfileAsync(UserProfileDto userProfile);
     }
 }

@@ -1,69 +1,104 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
+using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
 using SnowBuddies.Domain.Entities;
+using SnowBuddies.Domain.Exceptions;
 
 namespace SnowBuddies.Application.Implementation.Services
 {
-    public class ExternalLoginService: IExternalLoginService
+    public class ExternalLoginService : IExternalLoginService
     {
+        private const int DisplayNameMaxLength = 30;
+        private const int NameMaxLength = 30;
+        private const int DisplayNameAttempts = 10;
+
         private readonly IGoogleAuthService _googleAuthService;
         private readonly IUserService _userService;
-        private readonly IConfiguration _configuration;
 
-        public ExternalLoginService(IGoogleAuthService googleAuthService, IUserService userService, IConfiguration configuration)
+        public ExternalLoginService(IGoogleAuthService googleAuthService, IUserService userService)
         {
             _googleAuthService = googleAuthService;
             _userService = userService;
-            _configuration = configuration;
         }
 
-        public async Task LoginWithGoogleAsync(string accessToken)
+        public async Task<User> LoginWithGoogleAsync(string idToken)
         {
-            await ValidateAccessToken(accessToken);
+            var userInfo = await _googleAuthService.ValidateIdTokenAsync(idToken);
 
-            var userInfo = await _googleAuthService.GetUserInfoAsync(accessToken);
-
-            if (userInfo == null || string.IsNullOrWhiteSpace(userInfo.Email))
+            if (string.IsNullOrWhiteSpace(userInfo.Email) || !userInfo.EmailVerified)
             {
-                throw new ArgumentNullException();
+                throw new UnauthorizedException("Google account email is not verified");
             }
 
-            var user = await _userService.GetUserByEmailAsync(userInfo.Email);
-
-            if (user == null)
+            var existingUser = await _userService.GetUserByEmailAsync(userInfo.Email);
+            if (existingUser != null)
             {
-                var newUser = new User()
+                return existingUser;
+            }
+
+            var newUser = new User()
+            {
+                Email = userInfo.Email,
+                DisplayName = await GenerateUniqueDisplayNameAsync(userInfo.GivenName, userInfo.Email),
+                UserProfile = new UserProfile()
                 {
-                    Email = userInfo.Email,
-                    UserId = Guid.NewGuid(),
-                    UserProfile = new UserProfile()
-                    {
-                        FirstName = userInfo.GivenName,
-                        LastName = userInfo.FamilyName,
-                    },
-                    DisplayName = $"{userInfo.GivenName}_{userInfo.Email}"
-                };
+                    FirstName = Truncate(userInfo.GivenName, NameMaxLength),
+                    LastName = Truncate(userInfo.FamilyName, NameMaxLength),
+                    ProfilePicture = userInfo.Picture
+                }
+            };
 
-                await _userService.CreateUserAsync(newUser);
-            }
+            return await _userService.CreateUserAsync(newUser);
         }
 
-        private async Task ValidateAccessToken (string accessToken) 
+        private async Task<string> GenerateUniqueDisplayNameAsync(string? givenName, string email)
         {
-            var validatedTokenResult = await _googleAuthService.ValidateAccessTokenAsync(accessToken);
-
-            if (validatedTokenResult.IssuedTo != _configuration.GetSection("Authentication:Google:ClientId").Value!)
+            var baseName = Sanitize(givenName);
+            if (baseName.Length == 0)
             {
-                throw new Exception("Invalid user");
+                baseName = Sanitize(email.Split('@')[0]);
             }
+            if (baseName.Length == 0)
+            {
+                baseName = "buddy";
+            }
+
+            // Leave room for "_" plus a 6 digit suffix.
+            baseName = Truncate(baseName, DisplayNameMaxLength - 7)!;
+
+            for (var attempt = 0; attempt < DisplayNameAttempts; attempt++)
+            {
+                var candidate = $"{baseName}_{RandomNumberGenerator.GetInt32(0, 1_000_000):D6}";
+                if (!await _userService.DisplayNameExistsAsync(candidate))
+                {
+                    return candidate;
+                }
+            }
+
+            throw new ConflictException("Could not generate a unique display name");
         }
 
+        private static string Sanitize(string? value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder();
+            foreach (var c in value)
+            {
+                if (char.IsLetterOrDigit(c) || c == '_' || c == '.')
+                {
+                    builder.Append(c);
+                }
+            }
+            return builder.ToString();
+        }
+
+        private static string? Truncate(string? value, int maxLength)
+        {
+            return value != null && value.Length > maxLength ? value[..maxLength] : value;
+        }
     }
 }

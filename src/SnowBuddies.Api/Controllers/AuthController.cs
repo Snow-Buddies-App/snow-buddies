@@ -1,31 +1,26 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using AutoMapper;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using Serilog;
+using Microsoft.AspNetCore.RateLimiting;
 using SnowBuddies.Api.Models;
 using SnowBuddies.Application.Dtos;
 using SnowBuddies.Application.Interfaces.IServices;
-using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : Controller
+    [EnableRateLimiting(RateLimitPolicies.Auth)]
+    public class AuthController : ControllerBase
     {
+        private const string InvalidCredentialsMessage = "Invalid email or password";
+
         private readonly IPasswordService _passwordService;
         private readonly IUserService _userService;
         private readonly IAuthenticationService _authenticationService;
         private readonly IExternalLoginService _externalLoginService;
         private readonly ILogger<AuthController> _logger;
-        
+
         public AuthController(IExternalLoginService externalLoginService, IPasswordService passwordService, IUserService userService, IAuthenticationService authenticationService, ILogger<AuthController> logger)
         {
-            _authenticationService = authenticationService;
             _passwordService = passwordService;
             _userService = userService;
             _authenticationService = authenticationService;
@@ -34,51 +29,47 @@ namespace SnowBuddies.Api.Controllers
         }
 
         [HttpPost("Login")]
+        [ProducesResponseType(typeof(AuthResult), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
+        [ProducesResponseType(429)]
         [ProducesResponseType(500)]
-        [ProducesResponseType(200)]
         public async Task<IActionResult> Login(UserLoginModel loginUserRequest)
         {
             if (string.IsNullOrWhiteSpace(loginUserRequest.Email) || string.IsNullOrWhiteSpace(loginUserRequest.Password))
             {
-                Log.Warning("Invalid user login request. Email or password is empty.");
+                _logger.LogWarning("Invalid user login request. Email or password is empty.");
                 return BadRequest("Invalid user");
             }
 
             var user = await _userService.GetUserByEmailAsync(loginUserRequest.Email);
 
-            if (user == null) 
+            // Unknown email and wrong password get the same response so callers can't probe which emails are registered.
+            if (user == null || !_passwordService.VerifyPasswordHash(loginUserRequest.Password, user.PasswordHash, user.PasswordSalt))
             {
-                Log.Information("User not found for login. Email: {UserEmail}", loginUserRequest.Email);
-                return NotFound("User not found");
+                _logger.LogInformation("Failed login attempt. Email: {UserEmail}", loginUserRequest.Email);
+                return Unauthorized(InvalidCredentialsMessage);
             }
-             
-            var isPasswordVerified = _passwordService.VerifyPasswordHash(loginUserRequest.Password, user.PasswordHash, user.PasswordSalt);
 
-            if (!isPasswordVerified)
-            {
-                Log.Information("Incorrect password for user login. Email: {UserEmail}", loginUserRequest.Email);
-                return Unauthorized("Incorrect password");
-            }
-            var token = _authenticationService.CreateToken(user);
-            return Ok(token);
+            return Ok(_authenticationService.CreateToken(user));
         }
 
         [HttpPost("Google-sign-in")]
+        [ProducesResponseType(typeof(AuthResult), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
+        [ProducesResponseType(429)]
         [ProducesResponseType(500)]
-        [ProducesResponseType(200)]
-        public async Task<IActionResult> LoginWithGoogle(string accessToken) 
+        public async Task<IActionResult> LoginWithGoogle(GoogleSignInModel request)
         {
-            if (string.IsNullOrWhiteSpace(accessToken)) 
+            if (string.IsNullOrWhiteSpace(request.IdToken))
             {
-                Log.Warning("Invalid Google sign-in request. Access token is empty.");
-                return BadRequest();
+                _logger.LogWarning("Invalid Google sign-in request. ID token is empty.");
+                return BadRequest("Google ID token is required");
             }
-            await _externalLoginService.LoginWithGoogleAsync(accessToken);
-            return Ok();
+
+            var user = await _externalLoginService.LoginWithGoogleAsync(request.IdToken);
+            return Ok(_authenticationService.CreateToken(user));
         }
     }
 }

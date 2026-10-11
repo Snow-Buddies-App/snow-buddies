@@ -1,28 +1,42 @@
 name: CI
 
 on:
-  workflow_dispatch: 
+  workflow_dispatch:
   push:
+    branches:
+      - main
+      - development
   pull_request:
     branches:
-      -main
-      -development
+      - main
+      - development
 
 jobs:
-  CI-build-and-restore:
+  build-and-test:
     runs-on: ubuntu-latest
-    
+
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Setup .NET Core
-      uses: actions/setup-dotnet@v3
+    - uses: actions/checkout@v4
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 10.0.x
 
     - name: Restore dependencies
       run: dotnet restore SnowBuddies.sln
-      
+
     - name: Build
-      run: dotnet build SnowBuddies.sln --configuration Release
-    
+      run: dotnet build SnowBuddies.sln --configuration Release --no-restore
+
     - name: Test
       run: dotnet test SnowBuddies.sln -c Release --no-build
+
+  docker-build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Build Docker image
+      run: docker build -t snow-buddies-api .

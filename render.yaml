@@ -1,0 +1,30 @@
+# Render Blueprint: creates the API and its Postgres database in one step.
+# In the Render dashboard choose New > Blueprint and select this repository.
+# See docs/DEPLOYMENT.md for details.
+databases:
+  - name: snow-buddies-db
+    databaseName: snowbuddies
+    user: snowbuddies
+    # Free databases expire after 30 days. Switch to basic-256mb (or larger) before real users sign up.
+    plan: free
+
+services:
+  - type: web
+    name: snow-buddies-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    branch: development
+    # Free instances sleep after 15 minutes idle (first request then takes ~1 minute). Use starter or above for production.
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: snow-buddies-db
+          property: connectionString
+      - key: AppSettings__Token
+        generateValue: true
+      # Comma-separated Google OAuth client IDs (iOS, Android, web). Set in the dashboard.
+      - key: Authentication__Google__ClientIds
+        sync: false

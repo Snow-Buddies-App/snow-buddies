@@ -1,56 +1,52 @@
-﻿using System.Security.Claims;
-using Microsoft.IdentityModel.Tokens;
-using SnowBuddies.Application.Interfaces.IServices;
-using SnowBuddies.Domain.Entities;
 using System.IdentityModel.Tokens.Jwt;
-using Microsoft.Extensions.Configuration;
-using System.Text;
+using System.Security.Claims;
+using Microsoft.IdentityModel.Tokens;
+using SnowBuddies.Application.Dtos;
+using SnowBuddies.Application.Interfaces.IServices;
+using SnowBuddies.Application.Settings;
+using SnowBuddies.Domain.Entities;
 
 namespace SnowBuddies.Application.Implementation.Services
 {
     public class AuthenticationService : IAuthenticationService
     {
-        private readonly IConfiguration _configuration;
-        public AuthenticationService(IConfiguration configuration)
+        private readonly JwtSettings _jwtSettings;
+
+        public AuthenticationService(JwtSettings jwtSettings)
         {
-            _configuration = configuration;
+            _jwtSettings = jwtSettings;
         }
 
-        public string CreateToken(User user)
+        public AuthResult CreateToken(User user)
         {
-            var key = GenerateSecurityKey();
-            var credentials = GenerateSigningCredentials(key);
+            var credentials = new SigningCredentials(_jwtSettings.GetSecurityKey(), SecurityAlgorithms.HmacSha256);
+            var expiresAt = DateTime.UtcNow.AddMinutes(_jwtSettings.ExpiryMinutes);
 
             var token = new JwtSecurityToken(
+                    issuer: _jwtSettings.Issuer,
+                    audience: _jwtSettings.Audience,
                     claims: GetClaims(user),
-                    expires: DateTime.Now.AddMinutes(10),
+                    expires: expiresAt,
                     signingCredentials: credentials
                 );
 
-            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-
-            return jwt;
-        }
-
-        private IEnumerable<Claim> GetClaims(User user) 
-        {
-            var claims = new List<Claim>
+            return new AuthResult
             {
+                Token = new JwtSecurityTokenHandler().WriteToken(token),
+                ExpiresAtUtc = expiresAt,
+                UserId = user.UserId
+            };
+        }
+
+        private static IEnumerable<Claim> GetClaims(User user)
+        {
+            return new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                 new Claim(ClaimTypes.Email, user.Email!),
-            }; 
-
-            return claims;
+                new Claim(ClaimTypes.Name, user.DisplayName ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+            };
         }
-
-        private SymmetricSecurityKey GenerateSecurityKey()
-        {
-            return new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration.GetSection("AppSettings:Token")?.Value!));
-        }
-
-        private SigningCredentials GenerateSigningCredentials(SymmetricSecurityKey key)
-        {
-            return new SigningCredentials(key, SecurityAlgorithms.HmacSha512);
-        }
-
     }
 }
